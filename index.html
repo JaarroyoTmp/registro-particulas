@@ -480,6 +480,9 @@
     let streamCamara = null;
     let fotoCapturada = null;
 
+    // Cambia este código por el que quieras usar en taller.
+    const CODIGO_BORRADO = "1010";
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -621,16 +624,30 @@
             <td>${informe}</td>
             <td>${item.foto_url ? `<a href="${item.foto_url}" target="_blank">📷 Ver foto</a>` : `<span class="pendiente">SIN FOTO</span>`}</td>
             <td>
-              <button class="btn-borrar" onclick="borrarRegistro(${item.id}, '${item.foto_path || ""}')">🗑 Borrar</button>
+              <button class="btn-borrar" onclick="pedirCodigoBorrado(${item.id}, '${item.foto_path || ""}', '${escaparAtributo(item.referencia)}')">🗑 Borrar</button>
             </td>
           </tr>
         `;
       }).join("");
     }
 
-    async function borrarRegistro(id, fotoPath = "") {
-      const confirmar = confirm("¿Seguro que quieres borrar esta línea?");
+    function pedirCodigoBorrado(id, fotoPath = "", referencia = "") {
+      const codigo = prompt(`Para borrar la línea ${referencia}, introduce el código de borrado:`);
+
+      if (codigo === null) return;
+
+      if (codigo !== CODIGO_BORRADO) {
+        mostrarMensaje("error", "Código incorrecto. La línea NO se ha borrado.");
+        return;
+      }
+
+      const confirmar = confirm("Código correcto. ¿Confirmas que quieres borrar esta línea definitivamente?");
       if (!confirmar) return;
+
+      borrarRegistro(id, fotoPath);
+    }
+
+    async function borrarRegistro(id, fotoPath = "") {
 
       mostrarMensaje("info", "Borrando línea...");
 
@@ -678,6 +695,16 @@
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+    }
+
+    function escaparAtributo(texto) {
+      if (texto === null || texto === undefined) return "";
+      return String(texto)
+        .replaceAll("\", "\\")
+        .replaceAll("'", "\'")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
     }
 
     cargarRegistros();
