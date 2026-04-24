@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Partículas Magnéticas</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --azul: #082b55;
+      --azul-claro: #0b63ce;
+      --naranja: #ff7900;
+      --cyan: #00e5e5;
+      --fondo: #f5f7fb;
+      --borde: #d8dde8;
+      --texto: #1f2937;
+      --verde: #169c45;
+      --rojo: #dc2626;
+      --amarillo: #f28c00;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+    }
+
+    .cabecera {
+      background: var(--azul);
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: 18px 32px;
+      border-bottom: 4px solid var(--naranja);
+    }
+
+    .cabecera img {
+      width: 245px;
+      max-height: 95px;
+      object-fit: contain;
+    }
+
+    .separador {
+      width: 1px;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .titulo h1 {
+      margin: 0 0 8px 0;
+      font-size: 30px;
+      color: white;
+    }
+
+    .titulo p {
+      margin: 0;
+      font-size: 17px;
+      color: #dbeafe;
+    }
+
+    main {
+      padding: 32px;
+    }
+
+    .tarjeta {
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+      padding: 28px;
+      margin-bottom: 28px;
+    }
+
+    .titulo-seccion {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--azul-claro);
+      font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 28px;
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: #2f3542;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      font-size: 15px;
+      background: white;
+    }
+
+    input:focus,
+    select:focus {
+      outline: 2px solid rgba(11, 99, 206, 0.25);
+      border-color: var(--azul-claro);
+    }
+
+    .acciones-form {
+      margin-top: 26px;
+    }
+
+    button {
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.2s;
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .btn-guardar {
+      background: var(--azul-claro);
+      color: white;
+      padding: 13px 20px;
+      font-size: 15px;
+    }
+
+    .btn-guardar:hover {
+      background: #084fb0;
+    }
+
+    .mensaje {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 22px;
+      border-radius: 8px;
+      font-weight: 800;
+      margin-bottom: 28px;
+    }
+
+    .mensaje.ok {
+      display: flex;
+      color: #08752e;
+      background: #e9fbee;
+      border: 1px solid #9ee7b1;
+    }
+
+    .mensaje.error {
+      display: flex;
+      color: #991b1b;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+    }
+
+    .mensaje.info {
+      display: flex;
+      color: #1e40af;
+      background: #dbeafe;
+      border: 1px solid #93c5fd;
+    }
+
+    .cerrar-mensaje {
+      background: transparent;
+      color: inherit;
+      font-size: 22px;
+      padding: 0;
+    }
+
+    .tabla-contenedor {
+      overflow-x: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: white;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      border: 1px solid #d4dbe8;
+      padding: 16px 20px;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    th {
+      background: var(--cyan);
+      color: #001f33;
+      font-weight: 900;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    tbody tr:hover {
+      background: #eef7ff;
+    }
+
+    .pendiente {
+      color: var(--amarillo);
+      font-weight: 900;
+    }
+
+    .realizado {
+      color: var(--verde);
+      font-weight: 900;
+    }
+
+    .btn-borrar {
+      background: white;
+      color: var(--rojo);
+      border: 1px solid var(--rojo);
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+
+    .btn-borrar:hover {
+      background: var(--rojo);
+      color: white;
+    }
+
+    footer {
+      text-align: center;
+      color: #7a7f89;
+      font-size: 13px;
+      padding: 10px 30px 28px;
+    }
+
+    @media (max-width: 950px) {
+      .cabecera {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .separador {
+        display: none;
+      }
+
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 18px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cabecera img {
+        width: 210px;
+      }
+
+      .titulo h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="cabecera">
+    <!-- Guarda el logo en la misma carpeta que este HTML con el nombre: logo-paramio.png -->
+    <img src="logo-paramio.jpg" alt="Talleres Mecánicos Paramio" />
+
+    <div class="separador"></div>
+
+    <div class="titulo">
+      <h1>Registro de Informes de Partículas Magnéticas</h1>
+      <p>Control y registro de ensayos no destructivos</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="tarjeta">
+      <div class="titulo-seccion">💾 Nuevo registro</div>
+
+      <form id="formRegistro">
+        <div class="grid">
+          <div>
+            <label for="fecha">FECHA</label>
+            <input type="date" id="fecha" required />
+          </div>
+
+          <div>
+            <label for="referencia">REFERENCIA</label>
+            <input type="text" id="referencia" placeholder="Ej: 5B07A-5477780B" required />
+          </div>
+
+          <div>
+            <label for="cantidad">CANTIDAD</label>
+            <input type="number" id="cantidad" min="1" placeholder="Ej: 45" required />
+          </div>
+
+          <div>
+            <label for="equipo">EQUIPO ENSAYO</label>
+            <select id="equipo" required>
+              <option value="">Seleccionar</option>
+              <option value="BANCADA">BANCADA</option>
+              <option value="YUGO">YUGO</option>
+              <option value="ELECTRODOS">ELECTRODOS</option>
+              <option value="BOBINA">BOBINA</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="acciones-form">
+          <button id="btnGuardar" class="btn-guardar" type="submit">💾 Guardar en Supabase</button>
+        </div>
+      </form>
+    </section>
+
+    <div id="mensaje" class="mensaje">
+      <span id="textoMensaje"></span>
+      <button class="cerrar-mensaje" onclick="ocultarMensaje()">×</button>
+    </div>
+
+    <section class="tarjeta">
+      <div class="titulo-seccion">🔄 Registros guardados</div>
+
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>FECHA</th>
+              <th>REFERENCIA</th>
+              <th>CANTIDAD</th>
+              <th>EQUIPO ENSAYO</th>
+              <th>INFORME DE PARTÍCULAS</th>
+              <th>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody id="tablaRegistros">
+            <tr>
+              <td colspan="6">Cargando registros...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Talleres Mecánicos PARAMIO · Control de Ensayos No Destructivos
+  </footer>
+
+  <script>
+    const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const form = document.getElementById("formRegistro");
+    const mensaje = document.getElementById("mensaje");
+    const textoMensaje = document.getElementById("textoMensaje");
+    const tabla = document.getElementById("tablaRegistros");
+    const btnGuardar = document.getElementById("btnGuardar");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      mostrarMensaje("info", "Guardando registro...");
+      btnGuardar.disabled = true;
+
+      const registro = {
+        fecha: document.getElementById("fecha").value,
+        referencia: document.getElementById("referencia").value.trim(),
+        cantidad: Number(document.getElementById("cantidad").value),
+        equipo_ensayo: document.getElementById("equipo").value,
+        informe_particulas: null
+      };
+
+      const { data, error } = await supabaseClient
+        .from("informes_particulas")
+        .insert([registro])
+        .select();
+
+      console.log("Registro enviado:", registro);
+      console.log("Respuesta Supabase:", { data, error });
+
+      btnGuardar.disabled = false;
+
+      if (error) {
+        mostrarMensaje("error", "ERROR: No se ha guardado el registro. " + error.message + " | Código: " + (error.code || "sin código"));
+        return;
+      }
+
+      mostrarMensaje("ok", "Registro guardado correctamente en Supabase.");
+      form.reset();
+      await cargarRegistros();
+    });
+
+    async function cargarRegistros() {
+      tabla.innerHTML = `<tr><td colspan="6">Cargando registros guardados...</td></tr>`;
+
+      const { data, error } = await supabaseClient
+        .from("informes_particulas")
+        .select("id, fecha, referencia, cantidad, equipo_ensayo, informe_particulas")
+        .order("fecha", { ascending: false })
+        .order("id", { ascending: false });
+
+      if (error) {
+        tabla.innerHTML = `<tr><td colspan="6">No se pudieron cargar los datos.</td></tr>`;
+        mostrarMensaje("error", "ERROR: No se pudo leer la tabla de Supabase. " + error.message);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        tabla.innerHTML = `<tr><td colspan="6">No hay registros guardados todavía.</td></tr>`;
+        return;
+      }
+
+      tabla.innerHTML = data.map(item => {
+        const informe = item.informe_particulas
+          ? `<span class="realizado">${escaparHTML(item.informe_particulas)}</span>`
+          : `<span class="pendiente">PENDIENTE</span>`;
+
+        return `
+          <tr>
+            <td>${formatearFecha(item.fecha)}</td>
+            <td>${escaparHTML(item.referencia)}</td>
+            <td>${item.cantidad}</td>
+            <td>${escaparHTML(item.equipo_ensayo)}</td>
+            <td>${informe}</td>
+            <td>
+              <button class="btn-borrar" onclick="borrarRegistro(${item.id})">🗑 Borrar</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function borrarRegistro(id) {
+      const confirmar = confirm("¿Seguro que quieres borrar esta línea?");
+      if (!confirmar) return;
+
+      mostrarMensaje("info", "Borrando línea...");
+
+      const { error } = await supabaseClient
+        .from("informes_particulas")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        mostrarMensaje("error", "ERROR: No se ha podido borrar la línea. " + error.message);
+        return;
+      }
+
+      mostrarMensaje("ok", "Línea borrada correctamente.");
+      await cargarRegistros();
+    }
+
+    function mostrarMensaje(tipo, texto) {
+      mensaje.className = "mensaje " + tipo;
+      textoMensaje.textContent = texto;
+    }
+
+    function ocultarMensaje() {
+      mensaje.className = "mensaje";
+      textoMensaje.textContent = "";
+    }
+
+    function formatearFecha(fechaISO) {
+      if (!fechaISO) return "";
+      const [year, month, day] = fechaISO.split("-");
+      return `${day}/${month}/${year}`;
+    }
+
+    function escaparHTML(texto) {
+      if (texto === null || texto === undefined) return "";
+      return String(texto)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    cargarRegistros();
+  </script>
+</body>
+</html>
