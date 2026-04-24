@@ -91,7 +91,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 28px;
     }
 
@@ -329,6 +329,11 @@
               <option value="BOBINA">BOBINA</option>
             </select>
           </div>
+
+          <div>
+            <label for="foto">FOTO</label>
+            <input type="file" id="foto" accept="image/*" capture="environment" />
+          </div>
         </div>
 
         <div class="acciones-form">
@@ -354,6 +359,7 @@
               <th>CANTIDAD</th>
               <th>EQUIPO ENSAYO</th>
               <th>INFORME DE PARTÍCULAS</th>
+              <th>FOTO</th>
               <th>ACCIONES</th>
             </tr>
           </thead>
@@ -389,12 +395,42 @@
       mostrarMensaje("info", "Guardando registro...");
       btnGuardar.disabled = true;
 
+      const archivoFoto = document.getElementById("foto").files[0];
+      let foto_url = null;
+      let foto_path = null;
+
+      if (archivoFoto) {
+        const extension = archivoFoto.name.split(".").pop();
+        foto_path = `particulas/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+
+        const { error: errorFoto } = await supabaseClient.storage
+          .from("fotos-particulas")
+          .upload(foto_path, archivoFoto, {
+            cacheControl: "3600",
+            upsert: false
+          });
+
+        if (errorFoto) {
+          btnGuardar.disabled = false;
+          mostrarMensaje("error", "ERROR: No se ha podido subir la foto. " + errorFoto.message);
+          return;
+        }
+
+        const { data: dataUrl } = supabaseClient.storage
+          .from("fotos-particulas")
+          .getPublicUrl(foto_path);
+
+        foto_url = dataUrl.publicUrl;
+      }
+
       const registro = {
         fecha: document.getElementById("fecha").value,
         referencia: document.getElementById("referencia").value.trim(),
         cantidad: Number(document.getElementById("cantidad").value),
         equipo_ensayo: document.getElementById("equipo").value,
-        informe_particulas: null
+        informe_particulas: null,
+        foto_url: foto_url,
+        foto_path: foto_path
       };
 
       const { data, error } = await supabaseClient
@@ -422,7 +458,7 @@
 
       const { data, error } = await supabaseClient
         .from("informes_particulas")
-        .select("id, fecha, referencia, cantidad, equipo_ensayo, informe_particulas")
+        .select("id, fecha, referencia, cantidad, equipo_ensayo, informe_particulas, foto_url, foto_path")
         .order("fecha", { ascending: false })
         .order("id", { ascending: false });
 
@@ -449,19 +485,26 @@
             <td>${item.cantidad}</td>
             <td>${escaparHTML(item.equipo_ensayo)}</td>
             <td>${informe}</td>
+            <td>${item.foto_url ? `<a href="${item.foto_url}" target="_blank">📷 Ver foto</a>` : `<span class="pendiente">SIN FOTO</span>`}</td>
             <td>
-              <button class="btn-borrar" onclick="borrarRegistro(${item.id})">🗑 Borrar</button>
+              <button class="btn-borrar" onclick="borrarRegistro(${item.id}, '${item.foto_path || ""}')">🗑 Borrar</button>
             </td>
           </tr>
         `;
       }).join("");
     }
 
-    async function borrarRegistro(id) {
+    async function borrarRegistro(id, fotoPath = "") {
       const confirmar = confirm("¿Seguro que quieres borrar esta línea?");
       if (!confirmar) return;
 
       mostrarMensaje("info", "Borrando línea...");
+
+      if (fotoPath) {
+        await supabaseClient.storage
+          .from("fotos-particulas")
+          .remove([fotoPath]);
+      }
 
       const { error } = await supabaseClient
         .from("informes_particulas")
