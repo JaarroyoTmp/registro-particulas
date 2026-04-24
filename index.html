@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registro de Partículas Magnéticas</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -413,12 +413,18 @@
   </footer>
 
   <script>
+    // =========================
+    // CONFIGURACION
+    // =========================
     const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
 
+    // Cambia estos codigos por los que quieras usar en taller.
+    const CODIGO_GUARDADO = "1010";
     const CODIGO_BORRADO = "1010";
 
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const form = document.getElementById("formRegistro");
     const mensaje = document.getElementById("mensaje");
@@ -440,6 +446,15 @@
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      const codigo = prompt("Introduce codigo de operario para guardar:");
+      if (codigo === null) return;
+
+      if (codigo !== CODIGO_GUARDADO) {
+        mostrarMensaje("error", "Codigo incorrecto. NO se ha guardado el registro.");
+        return;
+      }
+
       mostrarMensaje("info", "Guardando registro...");
       btnGuardar.disabled = true;
 
@@ -491,7 +506,7 @@
       btnGuardar.disabled = false;
 
       if (error) {
-        mostrarMensaje("error", "ERROR: No se ha guardado el registro. " + error.message + " | Código: " + (error.code || "sin código"));
+        mostrarMensaje("error", "ERROR: No se ha guardado el registro. " + error.message + " | Codigo: " + (error.code || "sin codigo"));
         return;
       }
 
@@ -513,7 +528,7 @@
         videoCamara.srcObject = streamCamara;
         modalCamara.classList.add("activa");
       } catch (error) {
-        mostrarMensaje("error", "ERROR: No se pudo abrir la cámara. Revisa permisos del navegador o usa HTTPS.");
+        mostrarMensaje("error", "ERROR: No se pudo abrir la camara. Revisa permisos del navegador o usa HTTPS.");
       }
     }
 
@@ -522,7 +537,7 @@
       const alto = videoCamara.videoHeight;
 
       if (!ancho || !alto) {
-        mostrarMensaje("error", "ERROR: La cámara todavía no está lista. Espera un segundo y vuelve a capturar.");
+        mostrarMensaje("error", "ERROR: La camara todavia no esta lista. Espera un segundo y vuelve a capturar.");
         return;
       }
 
@@ -567,7 +582,7 @@
         }
 
         if (!data || data.length === 0) {
-          tabla.innerHTML = `<tr><td colspan="7">No hay registros guardados todavía.</td></tr>`;
+          tabla.innerHTML = `<tr><td colspan="7">No hay registros guardados todavia.</td></tr>`;
           return;
         }
 
@@ -615,22 +630,22 @@
       const fotoPath = boton.dataset.fotoPath || "";
       const referencia = boton.dataset.referencia || "";
 
-      const codigo = prompt(`Para borrar la línea ${referencia}, introduce el código de borrado:`);
+      const codigo = prompt(`Para borrar la linea ${referencia}, introduce el codigo de borrado:`);
       if (codigo === null) return;
 
       if (codigo !== CODIGO_BORRADO) {
-        mostrarMensaje("error", "Código incorrecto. La línea NO se ha borrado.");
+        mostrarMensaje("error", "Codigo incorrecto. La linea NO se ha borrado.");
         return;
       }
 
-      const confirmar = confirm("Código correcto. ¿Confirmas que quieres borrar esta línea definitivamente?");
+      const confirmar = confirm("Codigo correcto. ¿Confirmas que quieres borrar esta linea definitivamente?");
       if (!confirmar) return;
 
       borrarRegistro(id, fotoPath);
     }
 
     async function borrarRegistro(id, fotoPath = "") {
-      mostrarMensaje("info", "Borrando línea...");
+      mostrarMensaje("info", "Borrando linea...");
 
       if (fotoPath) {
         await supabaseClient.storage
@@ -644,11 +659,11 @@
         .eq("id", id);
 
       if (error) {
-        mostrarMensaje("error", "ERROR: No se ha podido borrar la línea. " + error.message);
+        mostrarMensaje("error", "ERROR: No se ha podido borrar la linea. " + error.message);
         return;
       }
 
-      mostrarMensaje("ok", "Línea borrada correctamente.");
+      mostrarMensaje("ok", "Linea borrada correctamente.");
       await cargarRegistros();
     }
 
@@ -682,3 +697,4 @@
   </script>
 </body>
 </html>
+
