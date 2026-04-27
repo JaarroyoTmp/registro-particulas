@@ -612,7 +612,8 @@
       selectorRegistro.innerHTML = `<option value="">Seleccionar registro...</option>` + filtrados.map(r => {
         const estado = r.informe_particulas ? `REALIZADO ${r.informe_particulas}` : "PENDIENTE";
         const fecha = formatearFecha(r.fecha);
-        return `<option value="${r.id}">${fecha} · ${escaparHTML(r.referencia)} · Cant: ${r.cantidad} · ${estado}</option>`;
+        const numero = r.informe_particulas || r.numero_auto_informe || "SIN Nº";
+        return `<option value="${r.id}">${fecha} · ${escaparHTML(r.referencia)} · ${numero} · Cant: ${r.cantidad} · ${estado}</option>`;
       }).join("");
     }
 
@@ -636,7 +637,7 @@
 
       resumenRegistro.classList.remove("oculto");
 
-      document.getElementById("numeroInforme").value = registroActual.informe_particulas || generarNumeroSugerido();
+      document.getElementById("numeroInforme").value = registroActual.informe_particulas || registroActual.numero_auto_informe || generarNumeroSugerido();
       document.getElementById("cliente").value = registroActual.cliente || "";
       document.getElementById("operario").value = registroActual.operario || "";
       document.getElementById("resultado").value = registroActual.resultado || "APTO";
@@ -662,8 +663,8 @@
 
     function generarNumeroSugerido() {
       const year = new Date().getFullYear();
-      const realizados = registros.filter(r => r.informe_particulas && String(r.informe_particulas).includes(String(year))).length + 1;
-      return `PM-${year}-${String(realizados).padStart(3, "0")}`;
+      const id = registroActual?.id || 0;
+      return `PM-${year}-${String(id).padStart(4, "0")}`;
     }
 
     async function guardarInformeSupabase() {
@@ -710,7 +711,7 @@
       if (!registroActual) return null;
 
       return {
-        numeroInforme: document.getElementById("numeroInforme").value.trim(),
+        numeroInforme: document.getElementById("numeroInforme").value.trim() || registroActual.numero_auto_informe || generarNumeroSugerido(),
         fechaInforme: document.getElementById("fechaInforme").value,
         cliente: document.getElementById("cliente").value.trim(),
         operario: document.getElementById("operario").value.trim(),
