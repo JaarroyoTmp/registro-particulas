@@ -285,7 +285,7 @@
 
       <div class="acciones">
         <button class="btn-gris" id="btnRecargar" type="button">🔄 Recargar</button>
-        <button class="btn-primario" id="btnVerListado" type="button">📋 Ver listado de registros</button>
+        <button class="btn-primario" id="btnVerListado" type="button">📋 Abrir listado completo</button>
         <button class="btn-secundario" id="btnLimpiar" type="button">🧹 Limpiar formulario</button>
       </div>
 
@@ -295,32 +295,6 @@
         <div class="dato"><span>Cantidad</span><strong id="resCantidad">-</strong></div>
         <div class="dato"><span>Equipo</span><strong id="resEquipo">-</strong></div>
         <div class="dato"><span>Nº auto</span><strong id="resNumero">-</strong></div>
-      </div>
-    </section>
-
-    <section class="tarjeta" id="listadoRegistros">
-      <div class="titulo-seccion">
-        <span>📋 Listado de registros</span>
-        <span class="subtitulo">Control de pendientes y realizados</span>
-      </div>
-      <div style="overflow-x:auto;">
-        <table id="tablaListado" style="width:100%; border-collapse:collapse; background:white;">
-          <thead>
-            <tr style="background:#00d8d8; color:#001f33;">
-              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Fecha</th>
-              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Referencia</th>
-              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Cantidad</th>
-              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Equipo</th>
-              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Nº informe</th>
-              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Estado</th>
-              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">PDF</th>
-              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Acción</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyListado">
-            <tr><td colspan="8" style="padding:12px; border:1px solid #d4dbe8;">Cargando registros...</td></tr>
-          </tbody>
-        </table>
       </div>
     </section>
 
@@ -508,7 +482,9 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
 
     document.getElementById("btnCerrarMensaje").addEventListener("click", ocultarMensaje);
     document.getElementById("btnRecargar").addEventListener("click", cargarRegistros);
-    document.getElementById("btnVerListado").addEventListener("click", () => document.getElementById("listadoRegistros").scrollIntoView({ behavior: "smooth", block: "start" }));
+    document.getElementById("btnVerListado").addEventListener("click", () => {
+      window.location.href = "listado.html";
+    });
     document.getElementById("btnLimpiar").addEventListener("click", limpiarFormulario);
     document.getElementById("btnGenerarPDF").addEventListener("click", generarPDF);
     document.getElementById("btnGuardarInforme").addEventListener("click", guardarInformeSupabase);
@@ -537,7 +513,6 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
 
       registros = data || [];
       pintarSelector();
-      pintarListadoRegistros();
       mostrarMensaje("ok", "Registros cargados correctamente.");
     }
 
@@ -561,50 +536,6 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
 
       pintarListadoRegistros();
     }
-
-    function pintarListadoRegistros() {
-      const tbody = document.getElementById("tbodyListado");
-      if (!tbody) return;
-
-      const filtro = filtroEstado.value;
-      let datos = [...registros];
-      if (filtro === "pendientes") datos = datos.filter(r => (r.estado_informe || "pendiente") !== "realizado" && !r.numero_informe_final);
-      if (filtro === "realizados") datos = datos.filter(r => (r.estado_informe || "") === "realizado" || r.numero_informe_final);
-
-      if (!datos.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="padding:12px; border:1px solid #d4dbe8;">No hay registros con este filtro.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = datos.map(r => {
-        const numero = r.numero_informe_final || r.informe_particulas || "-";
-        const realizado = (r.estado_informe || "") === "realizado" || !!r.numero_informe_final;
-        const estadoTexto = realizado ? "REALIZADO" : "PENDIENTE";
-        const estadoColor = realizado ? "#169c45" : "#ff7900";
-        const pdf = r.pdf_url
-          ? `<a href="${escaparHTML(r.pdf_url)}" target="_blank" style="font-weight:800;color:#0b63ce;">Abrir PDF</a>`
-          : "-";
-
-        return `
-          <tr>
-            <td style="padding:9px; border:1px solid #d4dbe8;">${formatearFecha(r.fecha)}</td>
-            <td style="padding:9px; border:1px solid #d4dbe8; font-weight:800;">${escaparHTML(r.referencia || "-")}</td>
-            <td style="padding:9px; border:1px solid #d4dbe8;">${escaparHTML(r.cantidad || "-")}</td>
-            <td style="padding:9px; border:1px solid #d4dbe8;">${escaparHTML(r.equipo_ensayo || "-")}</td>
-            <td style="padding:9px; border:1px solid #d4dbe8; font-weight:800; color:#082b55;">${escaparHTML(numero)}</td>
-            <td style="padding:9px; border:1px solid #d4dbe8;"><span style="display:inline-block;padding:5px 9px;border-radius:999px;background:${estadoColor};color:white;font-weight:900;font-size:11px;">${estadoTexto}</span></td>
-            <td style="padding:9px; border:1px solid #d4dbe8;">${pdf}</td>
-            <td style="padding:9px; border:1px solid #d4dbe8;"><button type="button" class="btn-gris" onclick="seleccionarRegistroDesdeListado(${Number(r.id)})">Abrir</button></td>
-          </tr>`;
-      }).join("");
-    }
-
-    function seleccionarRegistroDesdeListado(id) {
-      selectorRegistro.value = String(id);
-      seleccionarRegistro();
-      document.getElementById("resumenRegistro").scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-
     function seleccionarRegistro() {
       const id = Number(selectorRegistro.value);
       registroActual = registros.find(r => Number(r.id) === id) || null;
@@ -700,7 +631,10 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         .eq("id", registroActual.id);
 
       if (error) {
-        mostrarMensaje("error", "ERROR guardando informe: " + error.message);
+        mostrarMensaje("error", "ERROR guardando informe: " + error.message + ". ATENCIÓN: revisa el registro antes de volver a intentarlo.");
+        alert("ERROR guardando informe: " + error.message + "
+
+Revisa Supabase antes de volver a guardar para no generar dudas con la numeración.");
         return;
       }
 
@@ -710,7 +644,8 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       document.getElementById("numeroInforme").value = numeroFinal;
       document.getElementById("resNumero").textContent = numeroFinal;
 
-      mostrarMensaje("ok", "Informe finalizado y guardado con Nº " + numeroFinal + ".");
+      mostrarMensaje("ok", "✅ Informe finalizado y guardado correctamente con Nº " + numeroFinal + ".");
+      alert("Informe guardado correctamente en Supabase con Nº " + numeroFinal);
       await cargarRegistros();
     }
 
