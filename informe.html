@@ -366,16 +366,32 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
 
     <section class="tarjeta">
       <div class="titulo-seccion"><span>✅ IV - Resultados</span><span class="subtitulo">Results</span></div>
-      <div class="grid-4">
-        <div class="campo"><label>Piezas / Parts</label><input id="resultadoPiezas"></div>
-        <div class="campo"><label>Nº indicaciones</label><input id="numeroIndicaciones" value="--"></div>
-        <div class="campo"><label>Situación X</label><input id="situacionX" value="--"></div>
-        <div class="campo"><label>Situación Y</label><input id="situacionY" value="--"></div>
-      </div>
+
       <div class="grid-3">
-        <div class="campo"><label>Longitud</label><input id="longitud" value="--"></div>
-        <div class="campo"><label>Resultado</label><select id="resultado"><option>APTO</option><option>NO APTO</option><option>PENDIENTE</option></select></div>
+        <div class="campo"><label>Piezas / Parts</label><input id="resultadoPiezas"></div>
+        <div class="campo"><label>Resultado general</label><select id="resultado"><option>APTO</option><option>NO APTO</option><option>PENDIENTE</option></select></div>
         <div class="campo"><label>Observaciones</label><textarea id="observaciones">Sin observaciones.</textarea></div>
+      </div>
+
+      <h3 style="margin: 8px 0 14px; color:#082b55; font-size:16px;">Indicaciones / Defectos detectados</h3>
+      <div style="overflow-x:auto;">
+        <table id="tablaIndicaciones" style="width:100%; border-collapse:collapse; background:white;">
+          <thead>
+            <tr style="background:#00d8d8; color:#001f33;">
+              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Nº indicaciones</th>
+              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Situación X</th>
+              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Situación Y</th>
+              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Longitud</th>
+              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Resultado</th>
+              <th style="padding:10px; border:1px solid #d4dbe8; text-align:left;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyIndicaciones"></tbody>
+        </table>
+      </div>
+      <div class="acciones">
+        <button type="button" class="btn-gris" id="btnAgregarIndicacion">➕ Añadir indicación / defecto</button>
+        <button type="button" class="btn-secundario" id="btnLimpiarIndicaciones">🧹 Limpiar indicaciones</button>
       </div>
     </section>
 
@@ -468,6 +484,8 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
     document.getElementById("btnLimpiar").addEventListener("click", limpiarFormulario);
     document.getElementById("btnGenerarPDF").addEventListener("click", generarPDF);
     document.getElementById("btnGuardarInforme").addEventListener("click", guardarInformeSupabase);
+    document.getElementById("btnAgregarIndicacion").addEventListener("click", () => agregarFilaIndicacion());
+    document.getElementById("btnLimpiarIndicaciones").addEventListener("click", limpiarIndicaciones);
     selectorRegistro.addEventListener("change", seleccionarRegistro);
     filtroEstado.addEventListener("change", pintarSelector);
     document.getElementById("cliente").addEventListener("input", aplicarReglasCliente);
@@ -534,6 +552,7 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       document.getElementById("resultadoPiezas").value = registroActual.cantidad || "";
       document.getElementById("cliente").value = registroActual.cliente || "";
       document.getElementById("observaciones").value = registroActual.observaciones || "Sin observaciones.";
+      cargarIndicacionesDesdeRegistro(registroActual);
 
       aplicarReglasEquipo();
       aplicarReglasCliente();
@@ -645,10 +664,7 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         evaluacion: val("evaluacion"),
         nivel: val("nivelSeveridad"),
         resultadoPiezas: val("resultadoPiezas"),
-        indicaciones: val("numeroIndicaciones"),
-        x: val("situacionX"),
-        y: val("situacionY"),
-        longitud: val("longitud"),
+        indicacionesLista: obtenerIndicaciones(),
         resultado: val("resultado"),
         observaciones: val("observaciones"),
         realizado: val("realizadoPor"),
@@ -775,7 +791,7 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         margin: { left: 17, right: 17 },
         styles: { fontSize: 7.5, cellPadding: 2.2, lineColor: [210, 218, 232], lineWidth: 0.25, halign: "center" },
         head: [["PIEZAS/Parts", "Nº INDICACIONES", "SITUACIÓN X", "SITUACIÓN Y", "LONGITUD", "RESULTADO"]],
-        body: [[d.resultadoPiezas || "-", d.indicaciones || "--", d.x || "--", d.y || "--", d.longitud || "--", d.resultado || "-"]],
+        body: construirFilasResultados(d),
         headStyles: { fillColor: [0, 216, 216], textColor: [0, 31, 51], fontStyle: "bold" },
         columnStyles: { 5: { fontStyle: "bold", textColor: d.resultado === "NO APTO" ? [220, 38, 38] : [22, 156, 69] } }
       });
@@ -930,7 +946,14 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       });
 
       // Firma digitalizada. El sistema prueba varios nombres posibles.
-      const posiblesFirmas = ["firma.png", "firma.jpeg", "firma.jpg"];
+      const posiblesFirmas = [
+        "https://jaarroyotmp.github.io/registro-particulas/firma.png?v=10",
+        "https://jaarroyotmp.github.io/registro-particulas/firma.jpeg?v=10",
+        "https://jaarroyotmp.github.io/registro-particulas/firma.jpg?v=10",
+        "firma.png",
+        "firma.jpeg",
+        "firma.jpg"
+      ];
       let firmaCargada = null;
       let tipoFirma = "PNG";
 
@@ -986,6 +1009,64 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       });
       document.getElementById("fechaInforme").value = hoy;
       document.getElementById("fechaFirma").value = hoy;
+    }
+
+    function agregarFilaIndicacion(datos = {}) {
+      const tbody = document.getElementById("tbodyIndicaciones");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="padding:8px; border:1px solid #d4dbe8;"><input class="ind-num" value="${escaparHTML(datos.indicaciones || "--")}" placeholder="Ej: 1"></td>
+        <td style="padding:8px; border:1px solid #d4dbe8;"><input class="ind-x" value="${escaparHTML(datos.x || "--")}" placeholder="X"></td>
+        <td style="padding:8px; border:1px solid #d4dbe8;"><input class="ind-y" value="${escaparHTML(datos.y || "--")}" placeholder="Y"></td>
+        <td style="padding:8px; border:1px solid #d4dbe8;"><input class="ind-long" value="${escaparHTML(datos.longitud || "--")}" placeholder="Longitud"></td>
+        <td style="padding:8px; border:1px solid #d4dbe8;">
+          <select class="ind-res">
+            <option ${datos.resultado === "APTO" ? "selected" : ""}>APTO</option>
+            <option ${datos.resultado === "NO APTO" ? "selected" : ""}>NO APTO</option>
+            <option ${datos.resultado === "PENDIENTE" ? "selected" : ""}>PENDIENTE</option>
+          </select>
+        </td>
+        <td style="padding:8px; border:1px solid #d4dbe8;"><button type="button" class="btn-gris" onclick="this.closest('tr').remove()">Eliminar</button></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function limpiarIndicaciones() {
+      document.getElementById("tbodyIndicaciones").innerHTML = "";
+      agregarFilaIndicacion({ resultado: document.getElementById("resultado").value || "APTO" });
+    }
+
+    function obtenerIndicaciones() {
+      const filas = Array.from(document.querySelectorAll("#tbodyIndicaciones tr"));
+      return filas.map(tr => ({
+        indicaciones: tr.querySelector(".ind-num")?.value || "--",
+        x: tr.querySelector(".ind-x")?.value || "--",
+        y: tr.querySelector(".ind-y")?.value || "--",
+        longitud: tr.querySelector(".ind-long")?.value || "--",
+        resultado: tr.querySelector(".ind-res")?.value || "APTO"
+      })).filter(r => r.indicaciones || r.x || r.y || r.longitud || r.resultado);
+    }
+
+    function construirFilasResultados(d) {
+      const lista = d.indicacionesLista && d.indicacionesLista.length
+        ? d.indicacionesLista
+        : [{ indicaciones: "--", x: "--", y: "--", longitud: "--", resultado: d.resultado || "APTO" }];
+
+      return lista.map((item, index) => [
+        index === 0 ? (d.resultadoPiezas || "-") : "",
+        item.indicaciones || "--",
+        item.x || "--",
+        item.y || "--",
+        item.longitud || "--",
+        item.resultado || d.resultado || "-"
+      ]);
+    }
+
+    function cargarIndicacionesDesdeRegistro(registro) {
+      const tbody = document.getElementById("tbodyIndicaciones");
+      tbody.innerHTML = "";
+      // Por ahora creamos una línea editable por defecto. Más adelante se puede guardar en Supabase como JSON.
+      agregarFilaIndicacion({ resultado: document.getElementById("resultado").value || "APTO" });
     }
 
     function val(id) { return document.getElementById(id)?.value || ""; }
