@@ -444,6 +444,7 @@
           <div class="campo">
             <label for="norma">NORMA / PROCEDIMIENTO</label>
             <select id="norma">
+              <option value="UNE-EN 1369(2013) / ET-022">TALGO: UNE-EN 1369(2013) / ET-022</option>
               <option value="UNE-EN ISO 9934-1 / UNE-EN ISO 3059">UNE-EN ISO 9934-1 / UNE-EN ISO 3059</option>
               <option value="UNE-EN ISO 17638 / UNE-EN ISO 23278">Soldaduras: UNE-EN ISO 17638 / UNE-EN ISO 23278</option>
               <option value="UNE-EN 1369">Fundición: UNE-EN 1369</option>
@@ -550,6 +551,16 @@
 
     const CODIGO_GUARDAR_INFORME = "2222";
 
+    // Reglas automáticas por cliente.
+    // Puedes añadir más clientes aquí.
+    const REGLAS_CLIENTE = {
+      "talgo": {
+        norma: "UNE-EN 1369(2013) / ET-022",
+        criterio: "Evaluación según UNE-EN 1369(2013) / ET-022",
+        observacion: "Criterio de evaluación aplicado según especificación cliente TALGO ET-022."
+      }
+    };
+
     let registros = [];
     let registroActual = null;
 
@@ -566,6 +577,8 @@
     document.getElementById("btnGenerarPDF").addEventListener("click", generarPDF);
     document.getElementById("btnGuardarInforme").addEventListener("click", guardarInformeSupabase);
     document.getElementById("btnVistaPrevia").addEventListener("click", mostrarVistaPrevia);
+    document.getElementById("cliente").addEventListener("input", aplicarReglasPorCliente);
+    document.getElementById("cliente").addEventListener("change", aplicarReglasPorCliente);
     selectorRegistro.addEventListener("change", seleccionarRegistro);
     filtroEstado.addEventListener("change", pintarSelector);
 
@@ -644,7 +657,54 @@
       document.getElementById("observaciones").value = registroActual.observaciones || "";
 
       pintarFotos();
+      aplicarReglasPorCliente();
+      aplicarReglasPorEquipo();
       mostrarVistaPrevia(false);
+    }
+
+    function aplicarReglasPorCliente() {
+      const cliente = normalizarTexto(document.getElementById("cliente").value);
+      const regla = Object.keys(REGLAS_CLIENTE).find(nombre => cliente.includes(nombre));
+
+      if (!regla) return;
+
+      const config = REGLAS_CLIENTE[regla];
+      document.getElementById("norma").value = config.norma;
+      document.getElementById("criterio").value = config.criterio;
+
+      const observaciones = document.getElementById("observaciones");
+      if (!observaciones.value.includes(config.observacion)) {
+        observaciones.value = observaciones.value
+          ? observaciones.value + "
+" + config.observacion
+          : config.observacion;
+      }
+    }
+
+    function aplicarReglasPorEquipo() {
+      if (!registroActual || !registroActual.equipo_ensayo) return;
+
+      const equipo = normalizarTexto(registroActual.equipo_ensayo);
+
+      if (equipo.includes("bancada")) {
+        document.getElementById("metodo").value = "Método continuo";
+        document.getElementById("particulas").value = "Partículas magnéticas fluorescentes en suspensión húmeda";
+        document.getElementById("magnetizacion").value = "Magnetización multidireccional en bancada";
+      }
+
+      if (equipo.includes("yugo")) {
+        document.getElementById("metodo").value = "Método continuo";
+        document.getElementById("particulas").value = "Partículas magnéticas visibles en suspensión húmeda";
+        document.getElementById("magnetizacion").value = "Magnetización con yugo en dos direcciones aproximadamente perpendiculares";
+      }
+    }
+
+    function normalizarTexto(texto) {
+      return String(texto || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .trim();
     }
 
     function pintarFotos() {
