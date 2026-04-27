@@ -673,12 +673,12 @@
       document.getElementById("criterio").value = config.criterio;
 
       const observaciones = document.getElementById("observaciones");
-      if (!observaciones.value.includes(config.observacion)) {
-        observaciones.value = observaciones.value
-          ? observaciones.value + "
-" + config.observacion
-          : config.observacion;
-      }
+
+if (!observaciones.value.includes(config.observacion)) {
+  observaciones.value = observaciones.value
+    ? observaciones.value + "\n" + config.observacion
+    : config.observacion;
+}
     }
 
     function aplicarReglasPorEquipo() {
