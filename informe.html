@@ -4,26 +4,245 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Informe Partículas Magnéticas</title>
+
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 
   <style>
-    :root{--azul:#082b55;--naranja:#ff7900;--cyan:#00d8d8;--fondo:#f5f7fb;--borde:#d8dde8;--texto:#1f2937;--verde:#169c45;--rojo:#dc2626;--gris:#64748b}
-    *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--fondo);color:var(--texto)}
-    .cabecera{background:var(--azul);color:#fff;display:flex;align-items:center;gap:28px;padding:18px 32px;border-bottom:4px solid var(--naranja)}
-    .cabecera img{width:230px;max-height:90px;object-fit:contain}.separador{width:1px;height:70px;background:rgba(255,255,255,.35)}
-    .titulo h1{margin:0 0 8px 0;font-size:30px}.titulo p{margin:0;font-size:16px;color:#dbeafe} main{padding:28px}
-    .tarjeta{background:#fff;border:1px solid var(--borde);border-radius:8px;box-shadow:0 2px 8px rgba(15,23,42,.08);padding:26px;margin-bottom:24px}
-    .titulo-seccion{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#0b63ce;font-size:18px;font-weight:900;text-transform:uppercase;margin-bottom:20px}.subtitulo{color:var(--gris);font-size:13px;text-transform:none}
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-    label{display:block;font-weight:800;font-size:12px;margin-bottom:7px;color:#2f3542;text-transform:uppercase} input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:5px;font-size:14px;background:#fff;font-family:inherit} textarea{min-height:80px;resize:vertical}.campo{margin-bottom:16px}
-    .acciones{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px} button{border:none;border-radius:5px;cursor:pointer;font-weight:800;padding:12px 16px;font-size:14px}.btn-primario{background:#0b63ce;color:#fff}.btn-secundario{background:var(--naranja);color:#fff}.btn-gris{background:#e2e8f0;color:#111827}.btn-verde{background:var(--verde);color:#fff}
-    .mensaje{display:none;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-radius:8px;font-weight:800;margin-bottom:22px}.mensaje.ok{display:flex;color:#08752e;background:#e9fbee;border:1px solid #9ee7b1}.mensaje.error{display:flex;color:#991b1b;background:#fee2e2;border:1px solid #fca5a5}.mensaje.info{display:flex;color:#1e40af;background:#dbeafe;border:1px solid #93c5fd}.cerrar-mensaje{background:transparent;color:inherit;font-size:22px;padding:0}
-    .resumen{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:14px}.dato{border:1px solid var(--borde);border-radius:6px;padding:12px;background:#fafafa}.dato span{display:block;font-size:11px;font-weight:900;color:var(--gris);margin-bottom:5px}.dato strong{font-size:15px}
-    .fotos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}.foto-card{border:1px solid var(--borde);border-radius:8px;padding:10px;background:#fafafa}.foto-card img{width:100%;height:150px;object-fit:cover;border-radius:6px;background:#e5e7eb}.foto-card a{display:block;margin-top:8px;font-weight:800;color:#0b63ce;text-decoration:none}
-    table{border-collapse:collapse;width:100%;background:#fff}th,td{border:1px solid #d4dbe8;padding:10px 12px;text-align:left;font-size:13px}th{background:var(--cyan);color:#001f33;font-weight:900}.oculto{display:none} footer{text-align:center;color:#7a7f89;font-size:13px;padding:10px 30px 28px}
-    @media(max-width:1100px){.grid-4,.grid-3,.resumen{grid-template-columns:1fr 1fr}} @media(max-width:700px){main{padding:16px}.grid-4,.grid-3,.grid-2,.resumen{grid-template-columns:1fr}.cabecera{flex-direction:column;align-items:flex-start}.separador{display:none}.cabecera img{width:210px}.titulo h1{font-size:23px}.acciones button{width:100%}}
+    :root {
+      --azul: #082b55;
+      --azul2: #0b63ce;
+      --naranja: #ff7900;
+      --cyan: #00d8d8;
+      --fondo: #f5f7fb;
+      --borde: #d8dde8;
+      --texto: #1f2937;
+      --verde: #169c45;
+      --rojo: #dc2626;
+      --gris: #64748b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+    }
+
+    .cabecera {
+      background: var(--azul);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: 18px 32px;
+      border-bottom: 4px solid var(--naranja);
+    }
+
+    .cabecera img {
+      width: 230px;
+      max-height: 90px;
+      object-fit: contain;
+    }
+
+    .separador {
+      width: 1px;
+      height: 70px;
+      background: rgba(255,255,255,.35);
+    }
+
+    .titulo h1 {
+      margin: 0 0 8px 0;
+      font-size: 30px;
+      color: #fff;
+    }
+
+    .titulo p {
+      margin: 0;
+      font-size: 16px;
+      color: #dbeafe;
+    }
+
+    main { padding: 28px; }
+
+    .tarjeta {
+      background: #fff;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(15,23,42,.08);
+      padding: 26px;
+      margin-bottom: 24px;
+    }
+
+    .titulo-seccion {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--azul2);
+      font-size: 18px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .subtitulo {
+      color: var(--gris);
+      font-size: 13px;
+      text-transform: none;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+
+    label {
+      display: block;
+      font-weight: 800;
+      font-size: 12px;
+      margin-bottom: 7px;
+      color: #2f3542;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      font-size: 14px;
+      background: #fff;
+      font-family: inherit;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .campo { margin-bottom: 16px; }
+
+    .acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 800;
+      padding: 12px 16px;
+      font-size: 14px;
+    }
+
+    .btn-primario { background: var(--azul2); color: #fff; }
+    .btn-secundario { background: var(--naranja); color: #fff; }
+    .btn-gris { background: #e2e8f0; color: #111827; }
+    .btn-verde { background: var(--verde); color: #fff; }
+
+    .mensaje {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-weight: 800;
+      margin-bottom: 22px;
+    }
+
+    .mensaje.ok { display: flex; color: #08752e; background: #e9fbee; border: 1px solid #9ee7b1; }
+    .mensaje.error { display: flex; color: #991b1b; background: #fee2e2; border: 1px solid #fca5a5; }
+    .mensaje.info { display: flex; color: #1e40af; background: #dbeafe; border: 1px solid #93c5fd; }
+
+    .cerrar-mensaje {
+      background: transparent;
+      color: inherit;
+      font-size: 22px;
+      padding: 0;
+    }
+
+    .resumen {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .dato {
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      padding: 12px;
+      background: #fafafa;
+    }
+
+    .dato span {
+      display: block;
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--gris);
+      margin-bottom: 5px;
+    }
+
+    .dato strong { font-size: 15px; }
+
+    .fotos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .foto-card {
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fafafa;
+    }
+
+    .foto-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #e5e7eb;
+    }
+
+    .foto-card a {
+      display: block;
+      margin-top: 8px;
+      font-weight: 800;
+      color: var(--azul2);
+      text-decoration: none;
+    }
+
+    .oculto { display: none; }
+
+    footer {
+      text-align: center;
+      color: #7a7f89;
+      font-size: 13px;
+      padding: 10px 30px 28px;
+    }
+
+    @media(max-width:1100px) {
+      .grid-4,.grid-3,.resumen { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media(max-width:700px) {
+      main { padding: 16px; }
+      .grid-4,.grid-3,.grid-2,.resumen { grid-template-columns: 1fr; }
+      .cabecera { flex-direction: column; align-items: flex-start; }
+      .separador { display: none; }
+      .cabecera img { width: 210px; }
+      .titulo h1 { font-size: 23px; }
+      .acciones button { width: 100%; }
+    }
   </style>
 </head>
 
@@ -33,27 +252,53 @@
     <div class="separador"></div>
     <div class="titulo">
       <h1>Generador de Informe de Partículas Magnéticas</h1>
-      <p>Plantilla tipo PC-03-38 · Magnetic Particle Testing Report</p>
+      <p>Diseño corporativo + contenido técnico completo</p>
     </div>
   </header>
 
   <main>
-    <div id="mensaje" class="mensaje"><span id="textoMensaje"></span><button class="cerrar-mensaje" id="btnCerrarMensaje">×</button></div>
+    <div id="mensaje" class="mensaje">
+      <span id="textoMensaje"></span>
+      <button class="cerrar-mensaje" id="btnCerrarMensaje">×</button>
+    </div>
 
     <section class="tarjeta">
-      <div class="titulo-seccion"><span>🔎 Seleccionar registro</span><span class="subtitulo">Datos leídos desde Supabase</span></div>
-      <div class="grid-2">
-        <div class="campo"><label>Registro</label><select id="selectorRegistro"><option>Cargando registros...</option></select></div>
-        <div class="campo"><label>Filtro</label><select id="filtroEstado"><option value="todos">Todos</option><option value="pendientes">Pendientes de informe</option><option value="realizados">Con informe</option></select></div>
+      <div class="titulo-seccion">
+        <span>🔎 Seleccionar registro</span>
+        <span class="subtitulo">Datos leídos desde Supabase</span>
       </div>
-      <div class="acciones"><button class="btn-gris" id="btnRecargar">🔄 Recargar</button><button class="btn-secundario" id="btnLimpiar">🧹 Limpiar formulario</button></div>
+
+      <div class="grid-2">
+        <div class="campo">
+          <label>Registro</label>
+          <select id="selectorRegistro"><option>Cargando registros...</option></select>
+        </div>
+        <div class="campo">
+          <label>Filtro</label>
+          <select id="filtroEstado">
+            <option value="todos">Todos</option>
+            <option value="pendientes">Pendientes de informe</option>
+            <option value="realizados">Con informe</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button class="btn-gris" id="btnRecargar" type="button">🔄 Recargar</button>
+        <button class="btn-secundario" id="btnLimpiar" type="button">🧹 Limpiar formulario</button>
+      </div>
+
       <div id="resumenRegistro" class="resumen oculto">
-        <div class="dato"><span>Fecha registro</span><strong id="resFecha">-</strong></div><div class="dato"><span>Referencia</span><strong id="resReferencia">-</strong></div><div class="dato"><span>Cantidad</span><strong id="resCantidad">-</strong></div><div class="dato"><span>Equipo</span><strong id="resEquipo">-</strong></div><div class="dato"><span>Nº auto</span><strong id="resNumero">-</strong></div>
+        <div class="dato"><span>Fecha registro</span><strong id="resFecha">-</strong></div>
+        <div class="dato"><span>Referencia</span><strong id="resReferencia">-</strong></div>
+        <div class="dato"><span>Cantidad</span><strong id="resCantidad">-</strong></div>
+        <div class="dato"><span>Equipo</span><strong id="resEquipo">-</strong></div>
+        <div class="dato"><span>Nº auto</span><strong id="resNumero">-</strong></div>
       </div>
     </section>
 
     <section class="tarjeta">
-      <div class="titulo-seccion"><span>📋 I - Datos generales</span><span class="subtitulo">Equivalente a General data</span></div>
+      <div class="titulo-seccion"><span>📋 I - Datos generales</span><span class="subtitulo">General data</span></div>
       <div class="grid-4">
         <div class="campo"><label>Nº informe</label><input id="numeroInforme" placeholder="Ej: 2026-089" required></div>
         <div class="campo"><label>Fecha informe</label><input type="date" id="fechaInforme" required></div>
@@ -130,7 +375,7 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       <div class="grid-3">
         <div class="campo"><label>Longitud</label><input id="longitud" value="--"></div>
         <div class="campo"><label>Resultado</label><select id="resultado"><option>APTO</option><option>NO APTO</option><option>PENDIENTE</option></select></div>
-        <div class="campo"><label>Observaciones</label><textarea id="observaciones"></textarea></div>
+        <div class="campo"><label>Observaciones</label><textarea id="observaciones">Sin observaciones.</textarea></div>
       </div>
     </section>
 
@@ -142,7 +387,10 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         <div class="campo"><label>Fecha firma</label><input type="date" id="fechaFirma"></div>
         <div class="campo"><label>Aprobado por</label><input id="aprobadoPor" value=""></div>
       </div>
-      <div class="acciones"><button class="btn-primario" id="btnGenerarPDF" type="button">📄 Generar PDF tipo plantilla</button><button class="btn-verde" id="btnGuardarInforme" type="button">💾 Guardar informe en Supabase</button></div>
+      <div class="acciones">
+        <button class="btn-primario" id="btnGenerarPDF" type="button">📄 Generar PDF elegante completo</button>
+        <button class="btn-verde" id="btnGuardarInforme" type="button">💾 Guardar informe en Supabase</button>
+      </div>
     </section>
 
     <section class="tarjeta">
@@ -228,452 +476,483 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
     document.getElementById("fechaInforme").value = hoy;
     document.getElementById("fechaFirma").value = hoy;
 
-    async function cargarRegistros(){
-      mostrarMensaje("info","Cargando registros desde Supabase...");
-      const {data,error}=await supabaseClient.from("informes_particulas").select("*").order("fecha",{ascending:false}).order("id",{ascending:false});
-      if(error){mostrarMensaje("error","ERROR cargando registros: "+error.message);return;}
-      registros=data||[];
+    async function cargarRegistros() {
+      mostrarMensaje("info", "Cargando registros desde Supabase...");
+      const { data, error } = await supabaseClient
+        .from("informes_particulas")
+        .select("*")
+        .order("fecha", { ascending: false })
+        .order("id", { ascending: false });
+
+      if (error) {
+        mostrarMensaje("error", "ERROR cargando registros: " + error.message);
+        return;
+      }
+
+      registros = data || [];
       pintarSelector();
-      mostrarMensaje("ok","Registros cargados correctamente.");
+      mostrarMensaje("ok", "Registros cargados correctamente.");
     }
 
-    function pintarSelector(){
-      const filtro=filtroEstado.value;
-      let datos=[...registros];
-      if(filtro==="pendientes") datos=datos.filter(r=>!r.informe_particulas);
-      if(filtro==="realizados") datos=datos.filter(r=>r.informe_particulas);
-      if(!datos.length){selectorRegistro.innerHTML='<option value="">No hay registros</option>';return;}
-      selectorRegistro.innerHTML='<option value="">Seleccionar registro...</option>'+datos.map(r=>{
-        const n=r.informe_particulas||r.numero_auto_informe||"SIN Nº";
-        return `<option value="${r.id}">${formatearFecha(r.fecha)} · ${escaparHTML(r.referencia)} · ${n} · ${r.cantidad} piezas · ${r.equipo_ensayo||""}</option>`;
+    function pintarSelector() {
+      const filtro = filtroEstado.value;
+      let datos = [...registros];
+      if (filtro === "pendientes") datos = datos.filter(r => !r.informe_particulas);
+      if (filtro === "realizados") datos = datos.filter(r => r.informe_particulas);
+
+      if (!datos.length) {
+        selectorRegistro.innerHTML = '<option value="">No hay registros</option>';
+        return;
+      }
+
+      selectorRegistro.innerHTML = '<option value="">Seleccionar registro...</option>' + datos.map(r => {
+        const n = r.informe_particulas || r.numero_auto_informe || "SIN Nº";
+        return `<option value="${r.id}">${formatearFecha(r.fecha)} · ${escaparHTML(r.referencia)} · ${n} · ${r.cantidad} piezas · ${r.equipo_ensayo || ""}</option>`;
       }).join("");
     }
 
-    function seleccionarRegistro(){
-      const id=Number(selectorRegistro.value);
-      registroActual=registros.find(r=>Number(r.id)===id)||null;
-      if(!registroActual){document.getElementById("resumenRegistro").classList.add("oculto");fotosContenedor.innerHTML='<p>No hay registro seleccionado.</p>';return;}
+    function seleccionarRegistro() {
+      const id = Number(selectorRegistro.value);
+      registroActual = registros.find(r => Number(r.id) === id) || null;
 
-      document.getElementById("resFecha").textContent=formatearFecha(registroActual.fecha);
-      document.getElementById("resReferencia").textContent=registroActual.referencia||"-";
-      document.getElementById("resCantidad").textContent=registroActual.cantidad||"-";
-      document.getElementById("resEquipo").textContent=registroActual.equipo_ensayo||"-";
-      document.getElementById("resNumero").textContent=registroActual.informe_particulas||registroActual.numero_auto_informe||"-";
+      if (!registroActual) {
+        document.getElementById("resumenRegistro").classList.add("oculto");
+        fotosContenedor.innerHTML = '<p>No hay registro seleccionado.</p>';
+        return;
+      }
+
+      document.getElementById("resFecha").textContent = formatearFecha(registroActual.fecha);
+      document.getElementById("resReferencia").textContent = registroActual.referencia || "-";
+      document.getElementById("resCantidad").textContent = registroActual.cantidad || "-";
+      document.getElementById("resEquipo").textContent = registroActual.equipo_ensayo || "-";
+      document.getElementById("resNumero").textContent = registroActual.informe_particulas || registroActual.numero_auto_informe || "-";
       document.getElementById("resumenRegistro").classList.remove("oculto");
 
-      document.getElementById("numeroInforme").value=registroActual.informe_particulas||registroActual.numero_auto_informe||generarNumeroSugerido();
-      document.getElementById("proyectoReferencia").value=registroActual.referencia||"";
-      document.getElementById("piezasEnsayadas").value=(registroActual.cantidad||"")+" Piezas";
-      document.getElementById("resultadoPiezas").value=registroActual.cantidad||"";
-      document.getElementById("cliente").value=registroActual.cliente||"";
-      document.getElementById("observaciones").value=registroActual.observaciones||"";
+      document.getElementById("numeroInforme").value = registroActual.informe_particulas || registroActual.numero_auto_informe || generarNumeroSugerido();
+      document.getElementById("proyectoReferencia").value = registroActual.referencia || "";
+      document.getElementById("piezasEnsayadas").value = (registroActual.cantidad || "") + " Piezas";
+      document.getElementById("resultadoPiezas").value = registroActual.cantidad || "";
+      document.getElementById("cliente").value = registroActual.cliente || "";
+      document.getElementById("observaciones").value = registroActual.observaciones || "Sin observaciones.";
 
       aplicarReglasEquipo();
       aplicarReglasCliente();
       pintarFotos();
     }
 
-    function aplicarReglasEquipo(){
-      if(!registroActual)return;
-      const equipo=normalizar(registroActual.equipo_ensayo);
-      const cfg=equipo.includes("yugo")?CONFIG_EQUIPO.yugo:CONFIG_EQUIPO.bancada;
-      Object.keys(cfg).forEach(id=>{if(document.getElementById(id))document.getElementById(id).value=cfg[id];});
+    function aplicarReglasEquipo() {
+      if (!registroActual) return;
+      const equipo = normalizar(registroActual.equipo_ensayo);
+      const cfg = equipo.includes("yugo") ? CONFIG_EQUIPO.yugo : CONFIG_EQUIPO.bancada;
+      Object.keys(cfg).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = cfg[id];
+      });
     }
 
-    function aplicarReglasCliente(){
-      const cliente=normalizar(document.getElementById("cliente").value);
-      if(cliente.includes("talgo")){
-        const r=REGLAS_CLIENTE.talgo;
-        document.getElementById("evaluacion").value=r.evaluacion;
-        document.getElementById("nivelSeveridad").value=r.nivel;
-        document.getElementById("material").value=r.material;
-        document.getElementById("extensionEnsayo").value=r.extension;
-        document.getElementById("estadoSuperficial").value=r.superficie;
+    function aplicarReglasCliente() {
+      const cliente = normalizar(document.getElementById("cliente").value);
+      if (cliente.includes("talgo")) {
+        const r = REGLAS_CLIENTE.talgo;
+        document.getElementById("evaluacion").value = r.evaluacion;
+        document.getElementById("nivelSeveridad").value = r.nivel;
+        document.getElementById("material").value = r.material;
+        document.getElementById("extensionEnsayo").value = r.extension;
+        document.getElementById("estadoSuperficial").value = r.superficie;
       }
     }
 
-    function pintarFotos(){
-      if(!registroActual||!registroActual.foto_url){fotosContenedor.innerHTML='<p>Este registro no tiene fotografía asociada.</p>';return;}
-      fotosContenedor.innerHTML=`<div class="foto-card"><img src="${escaparHTML(registroActual.foto_url)}"><a target="_blank" href="${escaparHTML(registroActual.foto_url)}">Abrir foto original</a></div>`;
+    function pintarFotos() {
+      if (!registroActual || !registroActual.foto_url) {
+        fotosContenedor.innerHTML = '<p>Este registro no tiene fotografía asociada.</p>';
+        return;
+      }
+      fotosContenedor.innerHTML = `<div class="foto-card"><img src="${escaparHTML(registroActual.foto_url)}"><a target="_blank" href="${escaparHTML(registroActual.foto_url)}">Abrir foto original</a></div>`;
     }
 
-    async function guardarInformeSupabase(){
-      if(!registroActual){mostrarMensaje("error","Selecciona primero un registro.");return;}
-      const codigo=prompt("Introduce código para guardar el informe:");
-      if(codigo===null)return;
-      if(codigo!==CODIGO_GUARDAR_INFORME){mostrarMensaje("error","Código incorrecto.");return;}
-      const payload={
-        informe_particulas:document.getElementById("numeroInforme").value.trim(),
-        cliente:document.getElementById("cliente").value.trim(),
-        operario:document.getElementById("realizadoPor").value.trim(),
-        resultado:document.getElementById("resultado").value,
-        observaciones:document.getElementById("observaciones").value.trim(),
-        norma:document.getElementById("evaluacion").value.trim(),
-        fecha_informe:document.getElementById("fechaInforme").value
+    async function guardarInformeSupabase() {
+      if (!registroActual) {
+        mostrarMensaje("error", "Selecciona primero un registro.");
+        return;
+      }
+
+      const codigo = prompt("Introduce código para guardar el informe:");
+      if (codigo === null) return;
+      if (codigo !== CODIGO_GUARDAR_INFORME) {
+        mostrarMensaje("error", "Código incorrecto.");
+        return;
+      }
+
+      const payload = {
+        informe_particulas: document.getElementById("numeroInforme").value.trim(),
+        cliente: document.getElementById("cliente").value.trim(),
+        operario: document.getElementById("realizadoPor").value.trim(),
+        resultado: document.getElementById("resultado").value,
+        observaciones: document.getElementById("observaciones").value.trim(),
+        norma: document.getElementById("evaluacion").value.trim(),
+        fecha_informe: document.getElementById("fechaInforme").value
       };
-      const {error}=await supabaseClient.from("informes_particulas").update(payload).eq("id",registroActual.id);
-      if(error){mostrarMensaje("error","ERROR guardando informe: "+error.message);return;}
-      mostrarMensaje("ok","Informe guardado en Supabase.");
+
+      const { error } = await supabaseClient
+        .from("informes_particulas")
+        .update(payload)
+        .eq("id", registroActual.id);
+
+      if (error) {
+        mostrarMensaje("error", "ERROR guardando informe: " + error.message);
+        return;
+      }
+
+      mostrarMensaje("ok", "Informe guardado en Supabase.");
       await cargarRegistros();
     }
 
-    function datos(){
+    function datos() {
       return {
-        informe:val("numeroInforme"), fecha:val("fechaInforme"), cliente:val("cliente"), extension:val("extensionEnsayo"), referencia:val("proyectoReferencia"), material:val("material"), piezas:val("piezasEnsayadas"), superficie:val("estadoSuperficial"),
-        equipoCodigo:val("equipoCodigo"), corriente:val("corriente"), secuencia:val("secuencia"), patronYugo:val("patronYugo"), separacion:val("separacionElectrodos"), direcciones:val("direcciones"), iluminacion:val("iluminacion"), luxometro:val("luxometro"), campoResidual:val("campoResidual"), indicadorCampo:val("indicadorCampo"),
-        marcaParticulas:val("marcaParticulas"), tipoParticulas:val("tipoParticulas"), loteParticulas:val("loteParticulas"), caducidadParticulas:val("caducidadParticulas"), colorParticulas:val("colorParticulas"), metodoAplicacion:val("metodoAplicacion"),
-        lacaMarca:val("lacaMarca"), lacaTipo:val("lacaTipo"), lacaLote:val("lacaLote"), lacaCaducidad:val("lacaCaducidad"), limpiezaPrevia:val("limpiezaPrevia"), limpiezaFinal:val("limpiezaFinal"), productoLimpieza:val("productoLimpieza"), marcaLimpieza:val("marcaLimpieza"),
-        inspeccion:val("inspeccion"), evaluacion:val("evaluacion"), nivel:val("nivelSeveridad"), resultadoPiezas:val("resultadoPiezas"), indicaciones:val("numeroIndicaciones"), x:val("situacionX"), y:val("situacionY"), longitud:val("longitud"), resultado:val("resultado"), observaciones:val("observaciones"),
-        realizado:val("realizadoPor"), nivelInspector:val("nivel"), fechaFirma:val("fechaFirma"), aprobado:val("aprobadoPor"), foto:registroActual?.foto_url||null
+        informe: val("numeroInforme"),
+        fecha: val("fechaInforme"),
+        cliente: val("cliente"),
+        extension: val("extensionEnsayo"),
+        referencia: val("proyectoReferencia"),
+        material: val("material"),
+        piezas: val("piezasEnsayadas"),
+        superficie: val("estadoSuperficial"),
+        equipoCodigo: val("equipoCodigo"),
+        corriente: val("corriente"),
+        secuencia: val("secuencia"),
+        patronYugo: val("patronYugo"),
+        separacion: val("separacionElectrodos"),
+        direcciones: val("direcciones"),
+        iluminacion: val("iluminacion"),
+        luxometro: val("luxometro"),
+        campoResidual: val("campoResidual"),
+        indicadorCampo: val("indicadorCampo"),
+        marcaParticulas: val("marcaParticulas"),
+        tipoParticulas: val("tipoParticulas"),
+        loteParticulas: val("loteParticulas"),
+        caducidadParticulas: val("caducidadParticulas"),
+        colorParticulas: val("colorParticulas"),
+        metodoAplicacion: val("metodoAplicacion"),
+        lacaMarca: val("lacaMarca"),
+        lacaTipo: val("lacaTipo"),
+        lacaLote: val("lacaLote"),
+        lacaCaducidad: val("lacaCaducidad"),
+        limpiezaPrevia: val("limpiezaPrevia"),
+        limpiezaFinal: val("limpiezaFinal"),
+        productoLimpieza: val("productoLimpieza"),
+        marcaLimpieza: val("marcaLimpieza"),
+        inspeccion: val("inspeccion"),
+        evaluacion: val("evaluacion"),
+        nivel: val("nivelSeveridad"),
+        resultadoPiezas: val("resultadoPiezas"),
+        indicaciones: val("numeroIndicaciones"),
+        x: val("situacionX"),
+        y: val("situacionY"),
+        longitud: val("longitud"),
+        resultado: val("resultado"),
+        observaciones: val("observaciones"),
+        realizado: val("realizadoPor"),
+        nivelInspector: val("nivel"),
+        fechaFirma: val("fechaFirma"),
+        aprobado: val("aprobadoPor"),
+        equipoEnsayo: registroActual?.equipo_ensayo || "",
+        cantidad: registroActual?.cantidad || "",
+        fechaRegistro: registroActual?.fecha || "",
+        foto: registroActual?.foto_url || null
       };
     }
 
-    async function generarPDF(){
-      if(!registroActual){mostrarMensaje("error","Selecciona primero un registro.");return;}
-      const d=datos();
-      const {jsPDF}=window.jspdf;
-      const doc=new jsPDF("p","mm","a4");
-      const W=210,H=297;
-
-      await cabeceraElegante(doc,d,W);
-
-      let y=42;
-      y=bloqueTitulo(doc,"I - DATOS GENERALES / General data",y);
-      y=tablaElegante(doc,y,[
-        ["Informe Nº",d.informe,"Fecha",formatearFecha(d.fecha)],
-        ["Cliente / Customer",d.cliente,"Extensión del ensayo / Test extension",d.extension],
-        ["Proyecto / Referencia",d.referencia,"Material",d.material],
-        ["Piezas ensayadas / Tested pieces",d.piezas,"Estado superficial / Surface condition",d.superficie]
-      ]);
-
-      y=bloqueTitulo(doc,"II - DATOS TÉCNICOS DEL ENSAYO / Test technique data",y+5);
-      y=subBloque(doc,"Sistema de magnetización / Magnetic system",y);
-      y=tablaElegante(doc,y,[
-        ["Equipo / código",d.equipoCodigo,"Corriente de magnetización",d.corriente],
-        ["Secuencia de magnetización",d.secuencia,"Direcciones de magnetización",d.direcciones],
-        ["Patrón yugo",d.patronYugo,"Separación de electrodos",d.separacion],
-        ["Iluminación",d.iluminacion,"Luxómetro",d.luxometro],
-        ["Campo residual",d.campoResidual,"Indicador de campo",d.indicadorCampo]
-      ]);
-
-      y=subBloque(doc,"Partículas magnéticas / Magnetic particles",y+3);
-      y=tablaElegante(doc,y,[
-        ["Marca",d.marcaParticulas,"Tipo",d.tipoParticulas],
-        ["Lote",d.loteParticulas,"Fecha caducidad",d.caducidadParticulas],
-        ["Color",d.colorParticulas,"Método de aplicación",d.metodoAplicacion]
-      ]);
-
-      y=subBloque(doc,"Laca de contraste y limpieza / Contrast lacquer and cleaning",y+3);
-      y=tablaElegante(doc,y,[
-        ["Laca marca",d.lacaMarca,"Laca tipo",d.lacaTipo],
-        ["Laca lote",d.lacaLote,"Laca caducidad",d.lacaCaducidad],
-        ["Limpieza previa",d.limpiezaPrevia,"Limpieza final",d.limpiezaFinal],
-        ["Producto limpieza",d.productoLimpieza,"Marca limpieza",d.marcaLimpieza]
-      ]);
-
-      if(y>225){pieElegante(doc,W,H);doc.addPage();await cabeceraElegante(doc,d,W);y=42;}
-      y=bloqueTitulo(doc,"III - REQUERIMIENTOS / Request",y+5);
-      y=tablaElegante(doc,y,[
-        ["Inspección / Inspection",d.inspeccion,"Evaluación / Evaluation",d.evaluacion],
-        ["Nivel de severidad / Severity level",d.nivel,"","" ]
-      ],true);
-
-      y=bloqueTitulo(doc,"IV - RESULTADOS / Results",y+5);
-      doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(80,80,80);
-      doc.text("Las piezas con resultado rechazada, se adjunta croquis o fotografía en anexo.",14,y); y+=4;
-      y=tablaResultadosElegante(doc,y,d);
-
-      if(d.observaciones){
-        y=bloqueTitulo(doc,"OBSERVACIONES / Remarks",y+5);
-        doc.autoTable({startY:y,theme:"grid",margin:{left:14,right:14},styles:{fontSize:8.5,cellPadding:3,lineColor:[210,218,232],lineWidth:.2,valign:"top"},body:[[d.observaciones]],columnStyles:{0:{cellWidth:182}},tableWidth:182});
-        y=doc.lastAutoTable.finalY;
+    async function generarPDF() {
+      if (!registroActual) {
+        mostrarMensaje("error", "Selecciona primero un registro.");
+        return;
       }
 
-      if(y>205){pieElegante(doc,W,H);doc.addPage();await cabeceraElegante(doc,d,W);y=42;}
-      y=bloqueTitulo(doc,"REGISTRO FOTOGRÁFICO / Photographic record",y+6);
-      if(d.foto){
-        try{
-          const img=await imagenUrlADataUrl(d.foto);
-          doc.addImage(img,"JPEG",14,y,82,58,undefined,"FAST");
-          doc.setFontSize(7.5);doc.setTextColor(100,100,100);doc.text("Fotografía asociada al registro de ensayo.",14,y+63);
-        }catch(e){
-          doc.setFontSize(8);doc.setTextColor(220,38,38);doc.text("No se pudo insertar la fotografía automáticamente.",14,y+8);
+      const d = datos();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("p", "mm", "a4");
+      const W = 210;
+      const H = 297;
+
+      await cabeceraPDF(doc, d, W);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(15);
+      doc.setTextColor(0, 0, 0);
+      doc.text("INFORME DE ENSAYO POR PARTÍCULAS MAGNÉTICAS", W / 2, 44, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.text(`Nº Informe: ${d.informe || "-"}`, 17, 56);
+      doc.text(`Fecha informe: ${formatearFecha(d.fecha) || "-"}`, 143, 56);
+
+      let y = 68;
+
+      y = tituloPDF(doc, "I - DATOS GENERALES / General data", y);
+      y = tabla4(doc, y, [
+        ["Cliente / Customer", d.cliente || "-", "Extensión ensayo / Test extension", d.extension || "-"],
+        ["Proyecto / Referencia", d.referencia || "-", "Material", d.material || "-"],
+        ["Piezas ensayadas / Tested pieces", d.piezas || "-", "Estado superficial / Surface condition", d.superficie || "-"],
+        ["Fecha registro", formatearFecha(d.fechaRegistro) || "-", "Equipo ensayo", d.equipoEnsayo || "-"]
+      ]);
+
+      y = tituloPDF(doc, "II - DATOS TÉCNICOS DEL ENSAYO / Test technique data", y + 7);
+      y = tabla2(doc, y, "Sistema de magnetización / Magnetic system", [
+        ["Equipo / código", d.equipoCodigo],
+        ["Corriente de magnetización", d.corriente],
+        ["Secuencia de magnetización", d.secuencia],
+        ["Direcciones de magnetización", d.direcciones],
+        ["Patrón yugo", d.patronYugo],
+        ["Separación de electrodos", d.separacion],
+        ["Iluminación", d.iluminacion],
+        ["Luxómetro", d.luxometro],
+        ["Campo residual", d.campoResidual],
+        ["Indicador de campo", d.indicadorCampo]
+      ]);
+
+      y = tabla2(doc, y + 4, "Partículas magnéticas / Magnetic particles", [
+        ["Marca", d.marcaParticulas],
+        ["Tipo", d.tipoParticulas],
+        ["Lote", d.loteParticulas],
+        ["Fecha caducidad", d.caducidadParticulas],
+        ["Color", d.colorParticulas],
+        ["Método de aplicación", d.metodoAplicacion]
+      ]);
+
+      if (y > 220) {
+        piePDF(doc, W, H);
+        doc.addPage();
+        await cabeceraPDF(doc, d, W);
+        y = 42;
+      }
+
+      y = tabla2(doc, y + 4, "Laca de contraste / Contrast lacquer", [
+        ["Marca", d.lacaMarca],
+        ["Tipo", d.lacaTipo],
+        ["Lote", d.lacaLote],
+        ["Fecha caducidad", d.lacaCaducidad]
+      ]);
+
+      y = tabla2(doc, y + 4, "Limpieza de la pieza / Cleaning the piece", [
+        ["Limpieza previa", d.limpiezaPrevia],
+        ["Limpieza final", d.limpiezaFinal],
+        ["Producto", d.productoLimpieza],
+        ["Marca", d.marcaLimpieza]
+      ]);
+
+      if (y > 220) {
+        piePDF(doc, W, H);
+        doc.addPage();
+        await cabeceraPDF(doc, d, W);
+        y = 42;
+      }
+
+      y = tituloPDF(doc, "III - REQUERIMIENTOS / Request", y + 7);
+      y = tabla4(doc, y, [
+        ["Inspección / Inspection", d.inspeccion || "-", "Evaluación / Evaluation", d.evaluacion || "-"],
+        ["Nivel de severidad / Severity level", d.nivel || "-", "", ""]
+      ], true);
+
+      y = tituloPDF(doc, "IV - RESULTADOS / Results", y + 7);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(90, 90, 90);
+      doc.text("Las piezas con resultado rechazada, se adjunta croquis o fotografía en anexo.", 17, y);
+      y += 4;
+
+      doc.autoTable({
+        startY: y,
+        theme: "grid",
+        margin: { left: 17, right: 17 },
+        styles: { fontSize: 7.5, cellPadding: 2.2, lineColor: [210, 218, 232], lineWidth: 0.25, halign: "center" },
+        head: [["PIEZAS/Parts", "Nº INDICACIONES", "SITUACIÓN X", "SITUACIÓN Y", "LONGITUD", "RESULTADO"]],
+        body: [[d.resultadoPiezas || "-", d.indicaciones || "--", d.x || "--", d.y || "--", d.longitud || "--", d.resultado || "-"]],
+        headStyles: { fillColor: [0, 216, 216], textColor: [0, 31, 51], fontStyle: "bold" },
+        columnStyles: { 5: { fontStyle: "bold", textColor: d.resultado === "NO APTO" ? [220, 38, 38] : [22, 156, 69] } }
+      });
+      y = doc.lastAutoTable.finalY;
+
+      if (d.observaciones) {
+        y = tituloPDF(doc, "OBSERVACIONES / Remarks", y + 7);
+        doc.autoTable({
+          startY: y,
+          theme: "grid",
+          margin: { left: 17, right: 17 },
+          styles: { fontSize: 8, cellPadding: 3, lineColor: [210, 218, 232], lineWidth: 0.25, valign: "top" },
+          body: [[d.observaciones]],
+          columnStyles: { 0: { cellWidth: 176 } }
+        });
+        y = doc.lastAutoTable.finalY;
+      }
+
+      if (y > 205) {
+        piePDF(doc, W, H);
+        doc.addPage();
+        await cabeceraPDF(doc, d, W);
+        y = 42;
+      }
+
+      y = tituloPDF(doc, "REGISTRO FOTOGRÁFICO / Photographic record", y + 7);
+      if (d.foto) {
+        try {
+          const img = await imagenUrlADataUrl(d.foto);
+          doc.addImage(img, "JPEG", 17, y, 82, 58, undefined, "FAST");
+          doc.setFontSize(7.5);
+          doc.setTextColor(100, 100, 100);
+          doc.text("Fotografía asociada al registro de ensayo.", 17, y + 63);
+        } catch (e) {
+          doc.setFontSize(8);
+          doc.setTextColor(220, 38, 38);
+          doc.text("No se pudo insertar la fotografía automáticamente.", 17, y + 8);
         }
-      }else{
-        doc.setFontSize(9);doc.setTextColor(120,120,120);doc.text("Sin fotografía asociada.",14,y+10);
+      } else {
+        doc.setFontSize(9);
+        doc.setTextColor(120, 120, 120);
+        doc.text("Sin fotografía asociada.", 17, y + 10);
       }
 
-      tablaFirmaElegante(doc,d,245);
-      pieElegante(doc,W,H);
+      tablaFirmaPDF(doc, d, 247);
+      piePDF(doc, W, H);
       doc.save(limpiarNombreArchivo(`${d.informe}_${d.referencia}.pdf`));
-      mostrarMensaje("ok","PDF generado con plantilla elegante completa.");
+      mostrarMensaje("ok", "PDF generado con diseño elegante y contenido completo.");
     }
 
-    async function cabeceraElegante(doc,d,W){
-      doc.setFillColor(8,43,85);doc.rect(0,0,W,30,"F");
-      doc.setFillColor(255,121,0);doc.rect(0,30,W,2.2,"F");
-      try{const logo=await imagenUrlADataUrl("logo-paramio.jpg");doc.addImage(logo,"JPEG",12,6,42,17,undefined,"FAST");}catch(e){doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(14);doc.text("PARAMIO",14,17)}
-      doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(13);doc.text("INFORME DE ENSAYO POR PARTÍCULAS MAGNÉTICAS",62,13);
-      doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.text("MAGNETIC PARTICLE TESTING REPORT · PC-03-38 · Rev. 0",62,20);
-      doc.setFont("helvetica","bold");doc.setFontSize(8);doc.text(`Informe Nº: ${d.informe||"-"}`,W-14,12,{align:"right"});doc.text(`Fecha: ${formatearFecha(d.fecha)||"-"}`,W-14,20,{align:"right"});
-      doc.setTextColor(0,0,0);
+    async function cabeceraPDF(doc, d, W) {
+      doc.setFillColor(8, 43, 85);
+      doc.rect(0, 0, W, 30, "F");
+      doc.setFillColor(255, 121, 0);
+      doc.rect(0, 30, W, 3, "F");
+
+      try {
+        const logo = await imagenUrlADataUrl("logo-paramio.jpg");
+        doc.addImage(logo, "JPEG", 12, 6, 43, 18, undefined, "FAST");
+      } catch (e) {
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("PARAMIO", 14, 18);
+      }
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text("ENSAYOS NO DESTRUCTIVOS", W - 14, 13, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      doc.text("Partículas Magnéticas", W - 14, 20, { align: "right" });
+      doc.setTextColor(0, 0, 0);
     }
 
-    function bloqueTitulo(doc,t,y){
-      doc.setFillColor(8,43,85);doc.roundedRect(14,y,182,8,1.6,1.6,"F");
-      doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.text(t,17,y+5.3);doc.setTextColor(0,0,0);return y+10;
+    function tituloPDF(doc, texto, y) {
+      doc.setFillColor(8, 43, 85);
+      doc.roundedRect(17, y, 176, 8, 1.2, 1.2, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8.5);
+      doc.text(texto, 20, y + 5.3);
+      doc.setTextColor(0, 0, 0);
+      return y + 10;
     }
 
-    function subBloque(doc,t,y){
-      doc.setFillColor(232,240,252);doc.roundedRect(14,y,182,6.5,1.2,1.2,"F");
-      doc.setTextColor(8,43,85);doc.setFont("helvetica","bold");doc.setFontSize(8);doc.text(t,17,y+4.5);doc.setTextColor(0,0,0);return y+8;
-    }
-
-    function tablaElegante(doc,y,rows,alto=false){
-      doc.autoTable({startY:y,theme:"grid",margin:{left:14,right:14},styles:{fontSize:7.7,cellPadding:2.4,lineColor:[210,218,232],lineWidth:.2,valign:"top"},body:rows,tableWidth:182,columnStyles:{0:{fontStyle:"bold",fillColor:[245,247,251],cellWidth:42},1:{textColor:[0,62,160],fontStyle:"bold",cellWidth:49},2:{fontStyle:"bold",fillColor:[245,247,251],cellWidth:42},3:{textColor:[0,62,160],fontStyle:"bold",cellWidth:49}},didParseCell:function(data){if(alto && (data.column.index===1||data.column.index===3)){data.cell.styles.minCellHeight=14;}}});
+    function tabla4(doc, y, body, alto = false) {
+      doc.autoTable({
+        startY: y,
+        theme: "grid",
+        margin: { left: 17, right: 17 },
+        styles: { fontSize: 7.5, cellPadding: 2.6, lineColor: [210, 218, 232], lineWidth: 0.25, valign: "top" },
+        body,
+        tableWidth: 176,
+        columnStyles: {
+          0: { fontStyle: "bold", fillColor: [245, 247, 251], cellWidth: 42 },
+          1: { textColor: [0, 62, 160], fontStyle: "bold", cellWidth: 46 },
+          2: { fontStyle: "bold", fillColor: [245, 247, 251], cellWidth: 42 },
+          3: { textColor: [0, 62, 160], fontStyle: "bold", cellWidth: 46 }
+        },
+        didParseCell: function (data) {
+          if (alto && (data.column.index === 1 || data.column.index === 3)) data.cell.styles.minCellHeight = 16;
+        }
+      });
       return doc.lastAutoTable.finalY;
     }
 
-    function tablaResultadosElegante(doc,y,d){
-      doc.autoTable({startY:y,theme:"grid",margin:{left:14,right:14},styles:{fontSize:7.5,cellPadding:2.2,lineColor:[210,218,232],lineWidth:.2,halign:"center"},head:[["PIEZAS/Parts","Nº INDICACIONES","SITUACIÓN X","SITUACIÓN Y","LONGITUD / Length","RESULTADO / Result"]],body:[[d.resultadoPiezas,d.indicaciones,d.x,d.y,d.longitud,d.resultado],["","","","","",""]],headStyles:{fillColor:[0,216,216],textColor:[0,31,51],fontStyle:"bold"},columnStyles:{5:{fontStyle:"bold",textColor:d.resultado==="NO APTO"?[220,38,38]:[22,156,69]}}});
+    function tabla2(doc, y, titulo, filas) {
+      doc.autoTable({
+        startY: y,
+        theme: "grid",
+        margin: { left: 17, right: 17 },
+        styles: { fontSize: 7.5, cellPadding: 2.4, lineColor: [210, 218, 232], lineWidth: 0.25, valign: "top" },
+        head: [[titulo, "Valor"]],
+        body: filas.map(f => [f[0], f[1] || "-"]),
+        tableWidth: 176,
+        headStyles: { fillColor: [0, 216, 216], textColor: [0, 31, 51], fontStyle: "bold" },
+        columnStyles: {
+          0: { fontStyle: "bold", fillColor: [245, 247, 251], cellWidth: 68 },
+          1: { textColor: [0, 62, 160], fontStyle: "bold", cellWidth: 108 }
+        }
+      });
       return doc.lastAutoTable.finalY;
     }
 
-    function tablaFirmaElegante(doc,d,y){
-      doc.autoTable({startY:y,theme:"grid",margin:{left:14,right:14},styles:{fontSize:7,cellPadding:2,lineColor:[120,120,120],lineWidth:.25,halign:"center"},body:[["","REALIZADO / Producer","APROBADO / Approved"],["NOMBRE/Name:",d.realizado,d.aprobado||""],["NIVEL/Level:",d.nivelInspector,""],["FIRMA/Signe:","",""],["FECHA/Date:",formatearFecha(d.fechaFirma),""]],columnStyles:{0:{cellWidth:45,fontStyle:"bold",fillColor:[245,247,251]},1:{cellWidth:91,textColor:[0,62,160],fontStyle:"bold"},2:{cellWidth:46}}});
-    }
-
-    function pieElegante(doc,W,H){
-      doc.setDrawColor(255,121,0);doc.setLineWidth(.5);doc.line(14,H-14,W-14,H-14);
-      doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(100,100,100);
-      doc.text("Documento generado automáticamente desde el sistema de registro de partículas magnéticas.",14,H-9);
-      doc.text(`Página ${doc.internal.getNumberOfPages()}`,W-14,H-9,{align:"right"});doc.setTextColor(0,0,0);
-    }
-
-    async function imagenUrlADataUrl(url){const r=await fetch(url);const b=await r.blob();return await new Promise((res,rej)=>{const reader=new FileReader();reader.onloadend=()=>res(reader.result);reader.onerror=rej;reader.readAsDataURL(b)})}
-    function limpiarFormulario(){document.querySelectorAll("input, textarea").forEach(el=>{if(!["fechaInforme","fechaFirma"].includes(el.id))el.value=""});document.getElementById("fechaInforme").value=hoy;document.getElementById("fechaFirma").value=hoy}
-    function val(id){return document.getElementById(id)?.value||""} function normalizar(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim()} function formatearFecha(f){if(!f)return"";const p=String(f).split("-");return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:f} function escaparHTML(t){return String(t??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")} function limpiarNombreArchivo(n){return n.replace(/[\\/:*?"<>|]/g,"-").replaceAll(" ","_")} function generarNumeroSugerido(){const year=new Date().getFullYear();return `PM-${year}-${String(registroActual?.id||0).padStart(4,"0")}`}
-    function mostrarMensaje(tipo,texto){mensaje.className="mensaje "+tipo;textoMensaje.textContent=texto} function ocultarMensaje(){mensaje.className="mensaje";textoMensaje.textContent=""}
-
-    // =====================================================
-    // PDF FINAL: plantilla tipo informe original, completa
-    // Esta función sobrescribe cualquier generarPDF anterior.
-    // =====================================================
-    async function generarPDF(){
-      if(!registroActual){mostrarMensaje("error","Selecciona primero un registro.");return;}
-      const d=datos();
-      const {jsPDF}=window.jspdf;
-      const doc=new jsPDF("p","mm","a4");
-      const W=210,H=297;
-
-      doc.setFont("helvetica","normal");
-      doc.setDrawColor(0,0,0);
-      doc.setLineWidth(0.35);
-      doc.rect(6,6,198,285);
-
-      await cabeceraInformeClasico(doc,d);
-      seccionClasica(doc,"I - DATOS GENERALES / General data",6,38,198);
-      bloqueDatosGenerales(doc,d,42);
-
-      seccionClasica(doc,"II - DATOS TÉCNICOS DEL ENSAYO / Test technique data",6,79,198);
-      bloqueTecnicoCompleto(doc,d,83);
-
-      seccionClasica(doc,"III - REQUERIMIENTOS / Request",6,173,198);
-      bloqueRequerimientos(doc,d,177);
-
-      seccionClasica(doc,"IV - RESULTADOS / Results",6,205,198);
-      bloqueResultados(doc,d,214);
-
-      seccionClasica(doc,"REGISTRO FOTOGRÁFICO / Photographic record",6,246,198);
-      if(d.foto){
-        try{
-          const img=await imagenUrlADataUrl(d.foto);
-          doc.addImage(img,"JPEG",11,253,82,42,undefined,"FAST");
-        }catch(e){
-          texto(doc,"No se pudo insertar la fotografía automáticamente.",11,258,7,false,false);
+    function tablaFirmaPDF(doc, d, y) {
+      doc.autoTable({
+        startY: y,
+        theme: "grid",
+        margin: { left: 17, right: 17 },
+        tableWidth: 176,
+        styles: { fontSize: 7, cellPadding: 2, lineColor: [180, 180, 180], lineWidth: 0.25, halign: "center" },
+        body: [
+          ["", "REALIZADO / Producer", "APROBADO / Approved"],
+          ["NOMBRE/Name:", d.realizado, d.aprobado || ""],
+          ["NIVEL/Level:", d.nivelInspector, ""],
+          ["FIRMA/Signe:", "", ""],
+          ["FECHA/Date:", formatearFecha(d.fechaFirma), ""]
+        ],
+        columnStyles: {
+          0: { cellWidth: 44, fontStyle: "bold", fillColor: [245, 247, 251] },
+          1: { cellWidth: 88, textColor: [0, 62, 160], fontStyle: "bold" },
+          2: { cellWidth: 44 }
         }
-      }
-
-      bloqueFirma(doc,d,266);
-      doc.save(limpiarNombreArchivo(`${d.informe}_${d.referencia}.pdf`));
-      mostrarMensaje("ok","PDF generado con formato tipo informe completo.");
-    }
-
-    async function cabeceraInformeClasico(doc,d){
-      try{
-        const logo=await imagenUrlADataUrl("logo-paramio.jpg");
-        doc.addImage(logo,"JPEG",13,8,36,18,undefined,"FAST");
-      }catch(e){
-        texto(doc,"PARAMIO",14,18,12,true,true);
-      }
-
-      texto(doc,"INFORME DE ENSAYO POR PARTÍCULAS MAGNÉTICAS",105,16,10.5,true,false,"center");
-      texto(doc,"MAGNETIC PARTICLE TESTING REPORT",105,23,7.5,false,false,"center");
-      texto(doc,"PC-03-38",194,13,6.5,false,false,"right");
-      texto(doc,"Rev: 0",194,21,6.5,false,false,"right");
-
-      texto(doc,"Informe Nº:",10,34,7,false,false);
-      texto(doc,d.informe||"-",48,34,7,true,true);
-      doc.line(38,35,78,35);
-      texto(doc,"Fecha:",162,34,7,false,false);
-      texto(doc,formatearFecha(d.fecha)||"-",182,34,7,false,false);
-      doc.line(178,35,201,35);
-    }
-
-    function seccionClasica(doc,t,x,y,w){
-      doc.setFillColor(235,235,235);
-      doc.rect(x,y,w,7,"FD");
-      texto(doc,t,x+2,y+4.8,7.2,true,false);
-    }
-
-    function texto(doc,t,x,y,size=6.3,bold=false,blue=false,align="left"){
-      doc.setFont("helvetica",bold?"bold":"normal");
-      doc.setFontSize(size);
-      doc.setTextColor(blue?0:0,blue?72:0,blue?180:0);
-      doc.text(String(t??""),x,y,{align});
-      doc.setTextColor(0,0,0);
-    }
-
-    function campoLinea(doc,label,value,x,y,labelW=38,lineW=76){
-      texto(doc,label,x,y,5.8,false,false);
-      texto(doc,value||"-",x+labelW,y,6.2,true,true);
-      doc.line(x+labelW-2,y+1,lineW,y+1);
-    }
-
-    function bloqueDatosGenerales(doc,d,y){
-      campoLinea(doc,"CLIENTE:",d.cliente,10,y,32,96);
-      campoLinea(doc,"EXTENSIÓN DEL ENSAYO:",d.extension,112,y,47,201);
-      texto(doc,"Customer",10,y+3.2,4.7,false,false);
-      texto(doc,"Test extension",112,y+3.2,4.7,false,false);
-
-      campoLinea(doc,"PROYECTO/REFERENCIA:",d.referencia,10,y+12,42,96);
-      campoLinea(doc,"MATERIAL:",d.material,112,y+12,30,201);
-      texto(doc,"Proyect/Reference",10,y+15.2,4.7,false,false);
-      texto(doc,"Material",112,y+15.2,4.7,false,false);
-
-      campoLinea(doc,"PIEZAS ENSAYADAS:",d.piezas,10,y+24,38,96);
-      campoLinea(doc,"ESTADO SUPERFICIAL:",d.superficie,112,y+24,39,201);
-      texto(doc,"Tested pieces",10,y+27.2,4.7,false,false);
-      texto(doc,"Surface condition",112,y+27.2,4.7,false,false);
-    }
-
-    function bloqueTecnicoCompleto(doc,d,y){
-      texto(doc,"SISTEMA DE MAGNETIZACIÓN/Magnetic system",10,y,5.9,true,false);
-      texto(doc,"PARTÍCULAS MAGNÉTICAS/Magnetic particles",112,y,5.9,true,false);
-
-      let yy=y+7;
-      campoLinea(doc,"Equipo/código:",d.equipoCodigo,10,yy,31,96);
-      campoLinea(doc,"Marca:",d.marcaParticulas,112,yy,18,158);
-      campoLinea(doc,"Tipo:",d.tipoParticulas,166,yy,13,201);
-      texto(doc,"Equipament/Code",10,yy+3.2,4.6,false,false);
-      texto(doc,"Mark",112,yy+3.2,4.6,false,false);
-      texto(doc,"Type",166,yy+3.2,4.6,false,false);
-
-      yy+=10;
-      campoLinea(doc,"Corriente de magnetización:",d.corriente,10,yy,50,96);
-      campoLinea(doc,"Lote:",d.loteParticulas,112,yy,16,158);
-      campoLinea(doc,"Fecha caducidad:",d.caducidadParticulas,166,yy,31,201);
-      texto(doc,"Magnetic current",10,yy+3.2,4.6,false,false);
-      texto(doc,"Lot",112,yy+3.2,4.6,false,false);
-      texto(doc,"Expired date",166,yy+3.2,4.6,false,false);
-
-      yy+=10;
-      campoLinea(doc,"Secuencia de magnetización:",d.secuencia,10,yy,50,96);
-      campoLinea(doc,"Color:",d.colorParticulas,112,yy,18,201);
-      texto(doc,"Magnetization sequence",10,yy+3.2,4.6,false,false);
-      texto(doc,"Color",112,yy+3.2,4.6,false,false);
-
-      yy+=10;
-      campoLinea(doc,"Patrón Yugo:",d.patronYugo,10,yy,29,96);
-      campoLinea(doc,"Método de aplicación:",d.metodoAplicacion,112,yy,38,201);
-      texto(doc,"Yoke pattern",10,yy+3.2,4.6,false,false);
-      texto(doc,"Aplication method",112,yy+3.2,4.6,false,false);
-
-      yy+=10;
-      campoLinea(doc,"Separación de electrodos:",d.separacion,10,yy,47,96);
-      texto(doc,"LACA DE CONTRASTE / Contrast lacquer",112,yy,5.9,true,false);
-      texto(doc,"Electrode separation",10,yy+3.2,4.6,false,false);
-
-      yy+=10;
-      campoLinea(doc,"Direcciones de magnetización:",d.direcciones,10,yy,51,96);
-      campoLinea(doc,"Marca:",d.lacaMarca,112,yy,18,158);
-      campoLinea(doc,"Tipo:",d.lacaTipo,166,yy,13,201);
-      texto(doc,"Magnetic direction",10,yy+3.2,4.6,false,false);
-      texto(doc,"Mark",112,yy+3.2,4.6,false,false);
-      texto(doc,"Type",166,yy+3.2,4.6,false,false);
-
-      yy+=10;
-      campoLinea(doc,"Iluminación:",d.iluminacion,10,yy,25,96);
-      campoLinea(doc,"Lote:",d.lacaLote,112,yy,16,158);
-      campoLinea(doc,"Fecha caducidad:",d.lacaCaducidad,166,yy,31,201);
-      texto(doc,"Ilumination",10,yy+3.2,4.6,false,false);
-      texto(doc,"Lot",112,yy+3.2,4.6,false,false);
-      texto(doc,"Expired date",166,yy+3.2,4.6,false,false);
-
-      yy+=10;
-      campoLinea(doc,"Luxómetro:",d.luxometro,10,yy,25,96);
-      texto(doc,"LIMPIEZA DE LA PIEZA / Cleaning the piece",112,yy,5.9,true,false);
-      texto(doc,"Luxometer",10,yy+3.2,4.6,false,false);
-
-      yy+=10;
-      campoLinea(doc,"Campo residual:",d.campoResidual,10,yy,32,96);
-      campoLinea(doc,"Limpieza previa:",d.limpiezaPrevia,112,yy,32,145);
-      campoLinea(doc,"Producto:",d.productoLimpieza,148,yy,19,173);
-      campoLinea(doc,"Marca:",d.marcaLimpieza,176,yy,16,201);
-      texto(doc,"Residual field",10,yy+3.2,4.6,false,false);
-      texto(doc,"Pre-cleaning",112,yy+3.2,4.6,false,false);
-      texto(doc,"Product",148,yy+3.2,4.6,false,false);
-      texto(doc,"Mark",176,yy+3.2,4.6,false,false);
-
-      yy+=10;
-      campoLinea(doc,"Indicador de campo:",d.indicadorCampo,10,yy,38,96);
-      campoLinea(doc,"Limpieza final:",d.limpiezaFinal,112,yy,31,145);
-      campoLinea(doc,"Lote:","--",148,yy,14,173);
-      campoLinea(doc,"Tipo:","--",176,yy,13,201);
-      texto(doc,"Feel indication",10,yy+3.2,4.6,false,false);
-      texto(doc,"Final cleaning",112,yy+3.2,4.6,false,false);
-      texto(doc,"Lot",148,yy+3.2,4.6,false,false);
-      texto(doc,"Type",176,yy+3.2,4.6,false,false);
-    }
-
-    function bloqueRequerimientos(doc,d,y){
-      texto(doc,"INSPECCIÓN / Inspection:",10,y,6,true,false);
-      const insp=doc.splitTextToSize(d.inspeccion||"-",70);
-      texto(doc,insp,45,y,5.8,true,true);
-      texto(doc,"EVALUACIÓN / Evaluation:",112,y,6,true,false);
-      const evalTxt=doc.splitTextToSize(d.evaluacion||"-",45);
-      texto(doc,evalTxt,157,y,5.8,true,true);
-      texto(doc,"Nivel de severidad:",112,y+17,6,false,false);
-      texto(doc,"Severity level",112,y+20,4.7,false,false);
-      texto(doc,d.nivel||"-",157,y+17,5.8,true,true);
-    }
-
-    function bloqueResultados(doc,d,y){
-      texto(doc,"(Las piezas con resultado rechazada, se adjunta croquis o fotografía en anexo hoja 2)",73,y-4,5.4,false,false,"center");
-      texto(doc,"(Pieces with rejected results, a sketch or photo is attached in annex sheet 2)",73,y-.5,5.2,false,false,"center");
-      doc.autoTable({
-        startY:y,
-        theme:"grid",
-        margin:{left:6,right:6},
-        tableWidth:198,
-        styles:{fontSize:5.7,cellPadding:1.1,lineColor:[0,0,0],lineWidth:.25,halign:"center",valign:"middle"},
-        head:[["PIEZAS/Parts","Nº INDICACIONES
-Nº indications","SITUACIÓN / Situation
-X","Y","LONGITUD / Length","RESULTADO / Result"]],
-        body:[[d.resultadoPiezas,d.indicaciones,d.x,d.y,d.longitud,d.resultado],["","","","","",""]],
-        headStyles:{fillColor:[255,255,255],textColor:[0,0,0],fontStyle:"bold"},
-        columnStyles:{0:{cellWidth:20},1:{cellWidth:31},2:{cellWidth:20},3:{cellWidth:20},4:{cellWidth:55},5:{cellWidth:52,fontStyle:"bold",textColor:d.resultado==="NO APTO"?[220,38,38]:[0,90,40]}}
       });
     }
 
-    function bloqueFirma(doc,d,y){
-      doc.autoTable({
-        startY:y,theme:"grid",margin:{left:6,right:6},tableWidth:198,
-        styles:{fontSize:5.7,cellPadding:1.1,lineColor:[0,0,0],lineWidth:.25,halign:"center",valign:"middle"},
-        body:[["","REALIZADO / Producer","APROBADO / Approved"],["NOMBRE/Name:",d.realizado,d.aprobado||""],["NIVEL/Level:",d.nivelInspector,""],["FIRMA/Signe:","",""],["FECHA/Date:",formatearFecha(d.fechaFirma),""]],
-        columnStyles:{0:{cellWidth:50,fontStyle:"bold"},1:{cellWidth:90,textColor:[0,62,160],fontStyle:"bold"},2:{cellWidth:58}}
+    function piePDF(doc, W, H) {
+      doc.setDrawColor(255, 121, 0);
+      doc.setLineWidth(0.5);
+      doc.line(17, H - 14, W - 17, H - 14);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text("Documento generado automáticamente desde el sistema de registro de partículas magnéticas.", 17, H - 9);
+      doc.text(`Página ${doc.internal.getNumberOfPages()}`, W - 17, H - 9, { align: "right" });
+      doc.setTextColor(0, 0, 0);
+    }
+
+    async function imagenUrlADataUrl(url) {
+      const r = await fetch(url);
+      const b = await r.blob();
+      return await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onloadend = () => res(reader.result);
+        reader.onerror = rej;
+        reader.readAsDataURL(b);
       });
     }
+
+    function limpiarFormulario() {
+      document.querySelectorAll("input, textarea").forEach(el => {
+        if (!["fechaInforme", "fechaFirma"].includes(el.id)) el.value = "";
+      });
+      document.getElementById("fechaInforme").value = hoy;
+      document.getElementById("fechaFirma").value = hoy;
+    }
+
+    function val(id) { return document.getElementById(id)?.value || ""; }
+    function normalizar(t) { return String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); }
+    function formatearFecha(f) { if (!f) return ""; const p = String(f).split("-"); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : f; }
+    function escaparHTML(t) { return String(t ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
+    function limpiarNombreArchivo(n) { return n.replace(/[\\/:*?"<>|]/g, "-").replaceAll(" ", "_"); }
+    function generarNumeroSugerido() { const year = new Date().getFullYear(); return `PM-${year}-${String(registroActual?.id || 0).padStart(4, "0")}`; }
+    function mostrarMensaje(tipo, texto) { mensaje.className = "mensaje " + tipo; textoMensaje.textContent = texto; }
+    function ocultarMensaje() { mensaje.className = "mensaje"; textoMensaje.textContent = ""; }
 
     cargarRegistros();
   </script>
