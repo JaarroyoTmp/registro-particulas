@@ -920,6 +920,8 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
     }
 
     async function tablaFirmaPDF(doc, d, y) {
+      let celdaFirma = null;
+
       doc.autoTable({
         startY: y,
         theme: "grid",
@@ -942,41 +944,54 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         },
         didParseCell: function (data) {
           if (data.row.index === 3) data.cell.styles.minCellHeight = 22;
+        },
+        didDrawCell: function (data) {
+          // Guardamos la posición REAL de la celda FIRMA/Signe en la columna central.
+          if (data.row.index === 3 && data.column.index === 1) {
+            celdaFirma = {
+              x: data.cell.x,
+              y: data.cell.y,
+              w: data.cell.width,
+              h: data.cell.height,
+              page: doc.internal.getNumberOfPages()
+            };
+          }
         }
       });
 
-      // Firma digitalizada. El sistema prueba varios nombres posibles.
       const posiblesFirmas = [
-        "https://jaarroyotmp.github.io/registro-particulas/firma.png?v=10",
-        "https://jaarroyotmp.github.io/registro-particulas/firma.jpeg?v=10",
-        "https://jaarroyotmp.github.io/registro-particulas/firma.jpg?v=10",
+        "https://jaarroyotmp.github.io/registro-particulas/firma.png?v=20",
+        "https://jaarroyotmp.github.io/registro-particulas/firma.jpeg?v=20",
+        "https://jaarroyotmp.github.io/registro-particulas/firma.jpg?v=20",
         "firma.png",
         "firma.jpeg",
         "firma.jpg"
       ];
+
       let firmaCargada = null;
       let tipoFirma = "PNG";
 
       for (const archivo of posiblesFirmas) {
         try {
           firmaCargada = await imagenUrlADataUrl(archivo);
-          tipoFirma = archivo.toLowerCase().endsWith("png") ? "PNG" : "JPEG";
+          tipoFirma = archivo.toLowerCase().includes(".png") ? "PNG" : "JPEG";
           break;
         } catch (e) {
           console.log("No encontrada o no cargable:", archivo);
         }
       }
 
-      if (firmaCargada) {
-        const paginaFirma = doc.internal.getNumberOfPages();
-        doc.setPage(paginaFirma);
+      if (firmaCargada && celdaFirma) {
+        doc.setPage(celdaFirma.page);
 
-        // Coordenadas dentro de la celda FIRMA/Signe, columna REALIZADO.
-        const firmaX = 76;
-        const firmaY = y + 32;
-        doc.addImage(firmaCargada, tipoFirma, firmaX, firmaY, 38, 13, undefined, "FAST");
+        const anchoFirma = 46;
+        const altoFirma = 14;
+        const firmaX = celdaFirma.x + (celdaFirma.w - anchoFirma) / 2;
+        const firmaY = celdaFirma.y + (celdaFirma.h - altoFirma) / 2;
+
+        doc.addImage(firmaCargada, tipoFirma, firmaX, firmaY, anchoFirma, altoFirma, undefined, "FAST");
       } else {
-        console.log("No se pudo cargar ninguna firma. Sube firma.png, firma.jpeg o firma.jpg al repositorio.");
+        console.log("No se pudo insertar la firma. Imagen cargada:", !!firmaCargada, "Celda firma:", celdaFirma);
       }
     }
 
