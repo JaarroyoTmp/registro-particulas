@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generador de Informe - Partículas Magnéticas</title>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+
+  <style>
+    :root {
+      --azul: #082b55;
+      --azul-claro: #0b63ce;
+      --naranja: #ff7900;
+      --cyan: #00d8d8;
+      --fondo: #f5f7fb;
+      --borde: #d8dde8;
+      --texto: #1f2937;
+      --verde: #169c45;
+      --rojo: #dc2626;
+      --amarillo: #f28c00;
+      --gris: #64748b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+    }
+
+    .cabecera {
+      background: var(--azul);
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: 18px 32px;
+      border-bottom: 4px solid var(--naranja);
+    }
+
+    .cabecera img {
+      width: 230px;
+      max-height: 90px;
+      object-fit: contain;
+    }
+
+    .separador {
+      width: 1px;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .titulo h1 {
+      margin: 0 0 8px 0;
+      font-size: 30px;
+      color: white;
+    }
+
+    .titulo p {
+      margin: 0;
+      font-size: 17px;
+      color: #dbeafe;
+    }
+
+    main { padding: 32px; }
+
+    .tarjeta {
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+      padding: 28px;
+      margin-bottom: 28px;
+    }
+
+    .titulo-seccion {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--azul-claro);
+      font-size: 18px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .subtitulo {
+      color: var(--gris);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: none;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: #2f3542;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      font-size: 15px;
+      background: white;
+      font-family: inherit;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid rgba(11, 99, 206, 0.25);
+      border-color: var(--azul-claro);
+    }
+
+    .campo {
+      margin-bottom: 18px;
+    }
+
+    .mensaje {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 22px;
+      border-radius: 8px;
+      font-weight: 800;
+      margin-bottom: 28px;
+    }
+
+    .mensaje.ok {
+      display: flex;
+      color: #08752e;
+      background: #e9fbee;
+      border: 1px solid #9ee7b1;
+    }
+
+    .mensaje.error {
+      display: flex;
+      color: #991b1b;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+    }
+
+    .mensaje.info {
+      display: flex;
+      color: #1e40af;
+      background: #dbeafe;
+      border: 1px solid #93c5fd;
+    }
+
+    .cerrar-mensaje {
+      background: transparent;
+      color: inherit;
+      font-size: 22px;
+      padding: 0;
+      border: none;
+      cursor: pointer;
+    }
+
+    .acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    button {
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: 0.2s;
+      padding: 13px 18px;
+      font-size: 15px;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-primario {
+      background: var(--azul-claro);
+      color: white;
+    }
+
+    .btn-primario:hover { background: #084fb0; }
+
+    .btn-secundario {
+      background: var(--naranja);
+      color: white;
+    }
+
+    .btn-secundario:hover { background: #d96500; }
+
+    .btn-gris {
+      background: #e2e8f0;
+      color: #1f2937;
+    }
+
+    .btn-gris:hover { background: #cbd5e1; }
+
+    .btn-verde {
+      background: var(--verde);
+      color: white;
+    }
+
+    .btn-verde:hover { background: #08752e; }
+
+    .resumen-registro {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .dato {
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      padding: 14px;
+      background: #fafafa;
+    }
+
+    .dato span {
+      display: block;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--gris);
+      margin-bottom: 6px;
+    }
+
+    .dato strong {
+      font-size: 16px;
+      color: var(--texto);
+    }
+
+    .fotos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .foto-card {
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fafafa;
+    }
+
+    .foto-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #e5e7eb;
+    }
+
+    .foto-card a {
+      display: block;
+      margin-top: 8px;
+      font-weight: 800;
+      color: var(--azul-claro);
+      text-decoration: none;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: white;
+    }
+
+    th, td {
+      border: 1px solid #d4dbe8;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: var(--cyan);
+      color: #001f33;
+      font-weight: 900;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .badge-pendiente {
+      color: #92400e;
+      background: #fef3c7;
+    }
+
+    .badge-realizado {
+      color: #08752e;
+      background: #dcfce7;
+    }
+
+    .oculto { display: none; }
+
+    footer {
+      text-align: center;
+      color: #7a7f89;
+      font-size: 13px;
+      padding: 10px 30px 28px;
+    }
+
+    @media (max-width: 1100px) {
+      .grid-4, .grid-3, .resumen-registro { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 700px) {
+      main { padding: 18px; }
+      .grid-4, .grid-3, .grid-2, .resumen-registro { grid-template-columns: 1fr; }
+      .cabecera { flex-direction: column; align-items: flex-start; }
+      .separador { display: none; }
+      .cabecera img { width: 210px; }
+      .titulo h1 { font-size: 24px; }
+      .acciones button { width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="cabecera">
+    <img src="logo-paramio.jpg" alt="Talleres Mecánicos Paramio" />
+    <div class="separador"></div>
+    <div class="titulo">
+      <h1>Generador de Informe de Partículas Magnéticas</h1>
+      <p>Creación de informe PDF a partir de registros guardados en Supabase</p>
+    </div>
+  </header>
+
+  <main>
+    <div id="mensaje" class="mensaje">
+      <span id="textoMensaje"></span>
+      <button class="cerrar-mensaje" id="btnCerrarMensaje">×</button>
+    </div>
+
+    <section class="tarjeta">
+      <div class="titulo-seccion">
+        <span>🔎 Seleccionar registro</span>
+        <span class="subtitulo">Datos leídos desde Supabase</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="campo">
+          <label for="selectorRegistro">REGISTRO</label>
+          <select id="selectorRegistro">
+            <option value="">Cargando registros...</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="filtroEstado">FILTRO</label>
+          <select id="filtroEstado">
+            <option value="todos">Todos</option>
+            <option value="pendientes">Pendientes de informe</option>
+            <option value="realizados">Con informe</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="btn-gris" id="btnRecargar">🔄 Recargar registros</button>
+        <button type="button" class="btn-secundario" id="btnLimpiar">🧹 Limpiar formulario</button>
+      </div>
+
+      <div id="resumenRegistro" class="resumen-registro oculto">
+        <div class="dato"><span>FECHA REGISTRO</span><strong id="resFecha">-</strong></div>
+        <div class="dato"><span>REFERENCIA</span><strong id="resReferencia">-</strong></div>
+        <div class="dato"><span>CANTIDAD</span><strong id="resCantidad">-</strong></div>
+        <div class="dato"><span>EQUIPO</span><strong id="resEquipo">-</strong></div>
+        <div class="dato"><span>ESTADO</span><strong id="resEstado">-</strong></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <div class="titulo-seccion">
+        <span>🧾 Datos del informe</span>
+        <span class="subtitulo">Campos editables antes de generar PDF</span>
+      </div>
+
+      <form id="formInforme">
+        <div class="grid-4">
+          <div class="campo">
+            <label for="numeroInforme">Nº INFORME</label>
+            <input type="text" id="numeroInforme" placeholder="Ej: PM-2026-001" required />
+          </div>
+
+          <div class="campo">
+            <label for="fechaInforme">FECHA INFORME</label>
+            <input type="date" id="fechaInforme" required />
+          </div>
+
+          <div class="campo">
+            <label for="cliente">CLIENTE</label>
+            <input type="text" id="cliente" placeholder="Ej: Talleres Mecánicos Paramio" />
+          </div>
+
+          <div class="campo">
+            <label for="operario">OPERARIO / INSPECTOR</label>
+            <input type="text" id="operario" placeholder="Nombre del operario" />
+          </div>
+        </div>
+
+        <div class="grid-4">
+          <div class="campo">
+            <label for="norma">NORMA / PROCEDIMIENTO</label>
+            <select id="norma">
+              <option value="UNE-EN ISO 9934-1 / UNE-EN ISO 3059">UNE-EN ISO 9934-1 / UNE-EN ISO 3059</option>
+              <option value="UNE-EN ISO 17638 / UNE-EN ISO 23278">Soldaduras: UNE-EN ISO 17638 / UNE-EN ISO 23278</option>
+              <option value="UNE-EN 1369">Fundición: UNE-EN 1369</option>
+              <option value="UNE-EN 10228-1">Forja: UNE-EN 10228-1</option>
+              <option value="UNE-EN ISO 10893-5">Tubos: UNE-EN ISO 10893-5</option>
+              <option value="OTRA">Otra / especificar en observaciones</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="metodo">MÉTODO</label>
+            <select id="metodo">
+              <option value="Método continuo">Método continuo</option>
+              <option value="Método residual">Método residual</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="particulas">MEDIO DE DETECCIÓN</label>
+            <select id="particulas">
+              <option value="Partículas magnéticas fluorescentes en suspensión húmeda">Fluorescentes húmedas</option>
+              <option value="Partículas magnéticas visibles en suspensión húmeda">Visibles húmedas</option>
+              <option value="Partículas magnéticas secas visibles">Secas visibles</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="resultado">RESULTADO</label>
+            <select id="resultado">
+              <option value="APTO">APTO</option>
+              <option value="NO APTO">NO APTO</option>
+              <option value="PENDIENTE DE EVALUACIÓN">PENDIENTE DE EVALUACIÓN</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="campo">
+            <label for="iluminacion">CONDICIONES DE OBSERVACIÓN</label>
+            <input type="text" id="iluminacion" value="Según UNE-EN ISO 3059" />
+          </div>
+
+          <div class="campo">
+            <label for="magnetizacion">MAGNETIZACIÓN</label>
+            <input type="text" id="magnetizacion" value="Dos direcciones aproximadamente perpendiculares" />
+          </div>
+
+          <div class="campo">
+            <label for="criterio">CRITERIO DE ACEPTACIÓN</label>
+            <input type="text" id="criterio" value="Según norma aplicable / pedido" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="campo">
+            <label for="observaciones">OBSERVACIONES</label>
+            <textarea id="observaciones" placeholder="Indicar observaciones, defectología, zonas inspeccionadas, reparaciones, etc."></textarea>
+          </div>
+
+          <div class="campo">
+            <label for="conclusion">CONCLUSIÓN</label>
+            <textarea id="conclusion">El ensayo por partículas magnéticas se realiza conforme a la normativa indicada. Las indicaciones observadas se valoran según el criterio de aceptación aplicable.</textarea>
+          </div>
+        </div>
+
+        <div class="acciones">
+          <button type="button" class="btn-primario" id="btnGenerarPDF">📄 Generar PDF</button>
+          <button type="button" class="btn-verde" id="btnGuardarInforme">💾 Guardar nº informe en Supabase</button>
+          <button type="button" class="btn-gris" id="btnVistaPrevia">👁 Vista previa datos</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="tarjeta">
+      <div class="titulo-seccion">
+        <span>📷 Fotografías asociadas</span>
+        <span class="subtitulo">Se insertarán en el PDF si están disponibles</span>
+      </div>
+      <div id="fotosContenedor" class="fotos-grid">
+        <p>No hay registro seleccionado.</p>
+      </div>
+    </section>
+
+    <section class="tarjeta oculto" id="vistaPrevia">
+      <div class="titulo-seccion">👁 Vista previa del informe</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <tbody id="tablaVistaPrevia"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Talleres Mecánicos PARAMIO · Generador de Informes END
+  </footer>
+
+  <script>
+    const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
+
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const CODIGO_GUARDAR_INFORME = "2222";
+
+    let registros = [];
+    let registroActual = null;
+
+    const selectorRegistro = document.getElementById("selectorRegistro");
+    const filtroEstado = document.getElementById("filtroEstado");
+    const mensaje = document.getElementById("mensaje");
+    const textoMensaje = document.getElementById("textoMensaje");
+    const resumenRegistro = document.getElementById("resumenRegistro");
+    const fotosContenedor = document.getElementById("fotosContenedor");
+
+    document.getElementById("btnCerrarMensaje").addEventListener("click", ocultarMensaje);
+    document.getElementById("btnRecargar").addEventListener("click", cargarRegistros);
+    document.getElementById("btnLimpiar").addEventListener("click", limpiarFormulario);
+    document.getElementById("btnGenerarPDF").addEventListener("click", generarPDF);
+    document.getElementById("btnGuardarInforme").addEventListener("click", guardarInformeSupabase);
+    document.getElementById("btnVistaPrevia").addEventListener("click", mostrarVistaPrevia);
+    selectorRegistro.addEventListener("change", seleccionarRegistro);
+    filtroEstado.addEventListener("change", pintarSelector);
+
+    document.getElementById("fechaInforme").value = new Date().toISOString().slice(0, 10);
+
+    async function cargarRegistros() {
+      mostrarMensaje("info", "Cargando registros desde Supabase...");
+      selectorRegistro.innerHTML = `<option value="">Cargando registros...</option>`;
+
+      const { data, error } = await supabaseClient
+        .from("informes_particulas")
+        .select("*")
+        .order("fecha", { ascending: false })
+        .order("id", { ascending: false });
+
+      if (error) {
+        mostrarMensaje("error", "ERROR: No se han podido cargar los registros. " + error.message);
+        selectorRegistro.innerHTML = `<option value="">Error cargando registros</option>`;
+        return;
+      }
+
+      registros = data || [];
+      pintarSelector();
+      mostrarMensaje("ok", "Registros cargados correctamente.");
+    }
+
+    function pintarSelector() {
+      const filtro = filtroEstado.value;
+      let filtrados = [...registros];
+
+      if (filtro === "pendientes") {
+        filtrados = filtrados.filter(r => !r.informe_particulas);
+      }
+
+      if (filtro === "realizados") {
+        filtrados = filtrados.filter(r => r.informe_particulas);
+      }
+
+      if (filtrados.length === 0) {
+        selectorRegistro.innerHTML = `<option value="">No hay registros para este filtro</option>`;
+        return;
+      }
+
+      selectorRegistro.innerHTML = `<option value="">Seleccionar registro...</option>` + filtrados.map(r => {
+        const estado = r.informe_particulas ? `REALIZADO ${r.informe_particulas}` : "PENDIENTE";
+        const fecha = formatearFecha(r.fecha);
+        return `<option value="${r.id}">${fecha} · ${escaparHTML(r.referencia)} · Cant: ${r.cantidad} · ${estado}</option>`;
+      }).join("");
+    }
+
+    function seleccionarRegistro() {
+      const id = Number(selectorRegistro.value);
+      registroActual = registros.find(r => Number(r.id) === id) || null;
+
+      if (!registroActual) {
+        resumenRegistro.classList.add("oculto");
+        fotosContenedor.innerHTML = `<p>No hay registro seleccionado.</p>`;
+        return;
+      }
+
+      document.getElementById("resFecha").textContent = formatearFecha(registroActual.fecha);
+      document.getElementById("resReferencia").textContent = registroActual.referencia || "-";
+      document.getElementById("resCantidad").textContent = registroActual.cantidad || "-";
+      document.getElementById("resEquipo").textContent = registroActual.equipo_ensayo || "-";
+      document.getElementById("resEstado").innerHTML = registroActual.informe_particulas
+        ? `<span class="badge badge-realizado">REALIZADO</span>`
+        : `<span class="badge badge-pendiente">PENDIENTE</span>`;
+
+      resumenRegistro.classList.remove("oculto");
+
+      document.getElementById("numeroInforme").value = registroActual.informe_particulas || generarNumeroSugerido();
+      document.getElementById("cliente").value = registroActual.cliente || "";
+      document.getElementById("operario").value = registroActual.operario || "";
+      document.getElementById("resultado").value = registroActual.resultado || "APTO";
+      document.getElementById("observaciones").value = registroActual.observaciones || "";
+
+      pintarFotos();
+      mostrarVistaPrevia(false);
+    }
+
+    function pintarFotos() {
+      if (!registroActual || !registroActual.foto_url) {
+        fotosContenedor.innerHTML = `<p>Este registro no tiene fotografía asociada.</p>`;
+        return;
+      }
+
+      fotosContenedor.innerHTML = `
+        <div class="foto-card">
+          <img src="${escaparHTML(registroActual.foto_url)}" alt="Foto del ensayo" />
+          <a href="${escaparHTML(registroActual.foto_url)}" target="_blank">Abrir foto original</a>
+        </div>
+      `;
+    }
+
+    function generarNumeroSugerido() {
+      const year = new Date().getFullYear();
+      const realizados = registros.filter(r => r.informe_particulas && String(r.informe_particulas).includes(String(year))).length + 1;
+      return `PM-${year}-${String(realizados).padStart(3, "0")}`;
+    }
+
+    async function guardarInformeSupabase() {
+      if (!registroActual) {
+        mostrarMensaje("error", "Selecciona primero un registro.");
+        return;
+      }
+
+      const codigo = prompt("Introduce código para guardar el nº de informe:");
+      if (codigo === null) return;
+
+      if (codigo !== CODIGO_GUARDAR_INFORME) {
+        mostrarMensaje("error", "Código incorrecto. No se ha guardado el informe.");
+        return;
+      }
+
+      const payload = {
+        informe_particulas: document.getElementById("numeroInforme").value.trim(),
+        cliente: document.getElementById("cliente").value.trim(),
+        operario: document.getElementById("operario").value.trim(),
+        resultado: document.getElementById("resultado").value,
+        observaciones: document.getElementById("observaciones").value.trim(),
+        norma: document.getElementById("norma").value,
+        fecha_informe: document.getElementById("fechaInforme").value
+      };
+
+      const { error } = await supabaseClient
+        .from("informes_particulas")
+        .update(payload)
+        .eq("id", registroActual.id);
+
+      if (error) {
+        mostrarMensaje("error", "ERROR: No se ha podido guardar el informe. Revisa que existan las columnas nuevas. " + error.message);
+        return;
+      }
+
+      mostrarMensaje("ok", "Informe guardado correctamente en Supabase.");
+      await cargarRegistros();
+      selectorRegistro.value = registroActual.id;
+      seleccionarRegistro();
+    }
+
+    function obtenerDatosInforme() {
+      if (!registroActual) return null;
+
+      return {
+        numeroInforme: document.getElementById("numeroInforme").value.trim(),
+        fechaInforme: document.getElementById("fechaInforme").value,
+        cliente: document.getElementById("cliente").value.trim(),
+        operario: document.getElementById("operario").value.trim(),
+        norma: document.getElementById("norma").value,
+        metodo: document.getElementById("metodo").value,
+        particulas: document.getElementById("particulas").value,
+        resultado: document.getElementById("resultado").value,
+        iluminacion: document.getElementById("iluminacion").value.trim(),
+        magnetizacion: document.getElementById("magnetizacion").value.trim(),
+        criterio: document.getElementById("criterio").value.trim(),
+        observaciones: document.getElementById("observaciones").value.trim(),
+        conclusion: document.getElementById("conclusion").value.trim(),
+        fechaRegistro: registroActual.fecha,
+        referencia: registroActual.referencia,
+        cantidad: registroActual.cantidad,
+        equipo: registroActual.equipo_ensayo,
+        fotoUrl: registroActual.foto_url
+      };
+    }
+
+    function mostrarVistaPrevia(scroll = true) {
+      const datos = obtenerDatosInforme();
+      if (!datos) {
+        mostrarMensaje("error", "Selecciona primero un registro.");
+        return;
+      }
+
+      document.getElementById("vistaPrevia").classList.remove("oculto");
+      document.getElementById("tablaVistaPrevia").innerHTML = `
+        ${filaPreview("Nº informe", datos.numeroInforme)}
+        ${filaPreview("Fecha informe", formatearFecha(datos.fechaInforme))}
+        ${filaPreview("Cliente", datos.cliente)}
+        ${filaPreview("Referencia", datos.referencia)}
+        ${filaPreview("Cantidad", datos.cantidad)}
+        ${filaPreview("Equipo", datos.equipo)}
+        ${filaPreview("Norma", datos.norma)}
+        ${filaPreview("Método", datos.metodo)}
+        ${filaPreview("Medio de detección", datos.particulas)}
+        ${filaPreview("Resultado", datos.resultado)}
+        ${filaPreview("Observaciones", datos.observaciones)}
+      `;
+
+      if (scroll) document.getElementById("vistaPrevia").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function filaPreview(campo, valor) {
+      return `<tr><th style="width: 260px;">${escaparHTML(campo)}</th><td>${escaparHTML(valor || "-")}</td></tr>`;
+    }
+
+    async function generarPDF() {
+      const datos = obtenerDatosInforme();
+
+      if (!datos) {
+        mostrarMensaje("error", "Selecciona primero un registro.");
+        return;
+      }
+
+      if (!datos.numeroInforme) {
+        mostrarMensaje("error", "Indica el nº de informe antes de generar el PDF.");
+        return;
+      }
+
+      mostrarMensaje("info", "Generando PDF...");
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("p", "mm", "a4");
+      const ancho = doc.internal.pageSize.getWidth();
+      const alto = doc.internal.pageSize.getHeight();
+
+      await cabeceraPDF(doc, ancho);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(15);
+      doc.text("INFORME DE ENSAYO POR PARTÍCULAS MAGNÉTICAS", ancho / 2, 43, { align: "center" });
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Nº Informe: ${datos.numeroInforme}`, 14, 55);
+      doc.text(`Fecha informe: ${formatearFecha(datos.fechaInforme)}`, 140, 55);
+
+      doc.autoTable({
+        startY: 64,
+        theme: "grid",
+        styles: { fontSize: 9, cellPadding: 2.8 },
+        headStyles: { fillColor: [8, 43, 85], textColor: 255 },
+        head: [["Campo", "Dato", "Campo", "Dato"]],
+        body: [
+          ["Cliente", datos.cliente || "-", "Operario / Inspector", datos.operario || "-"],
+          ["Referencia", datos.referencia || "-", "Cantidad", String(datos.cantidad || "-")],
+          ["Fecha registro", formatearFecha(datos.fechaRegistro), "Equipo ensayo", datos.equipo || "-"],
+          ["Resultado", datos.resultado, "Criterio", datos.criterio || "-"]
+        ],
+        columnStyles: {
+          0: { fontStyle: "bold", fillColor: [245, 247, 251], cellWidth: 36 },
+          1: { cellWidth: 58 },
+          2: { fontStyle: "bold", fillColor: [245, 247, 251], cellWidth: 40 },
+          3: { cellWidth: 48 }
+        }
+      });
+
+      doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 8,
+        theme: "grid",
+        styles: { fontSize: 9, cellPadding: 2.8 },
+        headStyles: { fillColor: [0, 216, 216], textColor: [0, 31, 51] },
+        head: [["Parámetro de ensayo", "Valor"]],
+        body: [
+          ["Norma / procedimiento", datos.norma],
+          ["Método", datos.metodo],
+          ["Medio de detección", datos.particulas],
+          ["Condiciones de observación", datos.iluminacion],
+          ["Magnetización", datos.magnetizacion],
+          ["Criterio de aceptación", datos.criterio]
+        ],
+        columnStyles: {
+          0: { fontStyle: "bold", fillColor: [245, 247, 251], cellWidth: 58 },
+          1: { cellWidth: 124 }
+        }
+      });
+
+      doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 8,
+        theme: "grid",
+        styles: { fontSize: 9, cellPadding: 3, valign: "top" },
+        headStyles: { fillColor: [8, 43, 85], textColor: 255 },
+        head: [["Observaciones", "Conclusión"]],
+        body: [[datos.observaciones || "Sin observaciones.", datos.conclusion || "-"]],
+        columnStyles: { 0: { cellWidth: 91 }, 1: { cellWidth: 91 } }
+      });
+
+      let y = doc.lastAutoTable.finalY + 12;
+
+      if (datos.fotoUrl) {
+        if (y > 205) {
+          piePDF(doc, ancho, alto);
+          doc.addPage();
+          await cabeceraPDF(doc, ancho);
+          y = 45;
+        }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("Evidencia fotográfica", 14, y);
+        y += 6;
+
+        try {
+          const imagen = await imagenUrlADataUrl(datos.fotoUrl);
+          doc.addImage(imagen, "JPEG", 14, y, 95, 70, undefined, "FAST");
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.text("Fotografía asociada al registro del ensayo.", 14, y + 76);
+        } catch (error) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          doc.text("No se pudo insertar la imagen automáticamente. Enlace:", 14, y);
+          doc.setTextColor(11, 99, 206);
+          doc.textWithLink("Abrir fotografía", 14, y + 6, { url: datos.fotoUrl });
+          doc.setTextColor(0, 0, 0);
+        }
+      }
+
+      const firmaY = 255;
+      doc.setDrawColor(120, 120, 120);
+      doc.line(25, firmaY, 85, firmaY);
+      doc.line(125, firmaY, 185, firmaY);
+      doc.setFontSize(9);
+      doc.text("Inspector / Operario", 55, firmaY + 6, { align: "center" });
+      doc.text("Responsable / Cliente", 155, firmaY + 6, { align: "center" });
+
+      piePDF(doc, ancho, alto);
+
+      const nombreArchivo = limpiarNombreArchivo(`${datos.numeroInforme}_${datos.referencia}.pdf`);
+      doc.save(nombreArchivo);
+      mostrarMensaje("ok", "PDF generado correctamente.");
+    }
+
+    async function cabeceraPDF(doc, ancho) {
+      doc.setFillColor(8, 43, 85);
+      doc.rect(0, 0, ancho, 30, "F");
+      doc.setFillColor(255, 121, 0);
+      doc.rect(0, 30, ancho, 3, "F");
+
+      try {
+        const logo = await imagenUrlADataUrl("logo-paramio.jpg");
+        doc.addImage(logo, "JPEG", 12, 6, 45, 18, undefined, "FAST");
+      } catch (e) {
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("PARAMIO", 14, 18);
+      }
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text("ENSAYOS NO DESTRUCTIVOS", ancho - 14, 13, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      doc.text("Partículas Magnéticas", ancho - 14, 20, { align: "right" });
+      doc.setTextColor(0, 0, 0);
+    }
+
+    function piePDF(doc, ancho, alto) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text("Documento generado automáticamente desde el sistema de registro de partículas magnéticas.", 14, alto - 10);
+      doc.text(`Página ${doc.internal.getNumberOfPages()}`, ancho - 14, alto - 10, { align: "right" });
+      doc.setTextColor(0, 0, 0);
+    }
+
+    async function imagenUrlADataUrl(url) {
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function limpiarFormulario() {
+      document.getElementById("formInforme").reset();
+      document.getElementById("fechaInforme").value = new Date().toISOString().slice(0, 10);
+      document.getElementById("conclusion").value = "El ensayo por partículas magnéticas se realiza conforme a la normativa indicada. Las indicaciones observadas se valoran según el criterio de aceptación aplicable.";
+      document.getElementById("iluminacion").value = "Según UNE-EN ISO 3059";
+      document.getElementById("magnetizacion").value = "Dos direcciones aproximadamente perpendiculares";
+      document.getElementById("criterio").value = "Según norma aplicable / pedido";
+      document.getElementById("vistaPrevia").classList.add("oculto");
+    }
+
+    function mostrarMensaje(tipo, texto) {
+      mensaje.className = "mensaje " + tipo;
+      textoMensaje.textContent = texto;
+    }
+
+    function ocultarMensaje() {
+      mensaje.className = "mensaje";
+      textoMensaje.textContent = "";
+    }
+
+    function formatearFecha(fechaISO) {
+      if (!fechaISO) return "";
+      const partes = fechaISO.split("-");
+      if (partes.length !== 3) return fechaISO;
+      return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+
+    function escaparHTML(texto) {
+      if (texto === null || texto === undefined) return "";
+      return String(texto)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function limpiarNombreArchivo(nombre) {
+      return nombre.replace(/[\\/:*?"<>|]/g, "-").replaceAll(" ", "_");
+    }
+
+    cargarRegistros();
+  </script>
+</body>
+</html>
