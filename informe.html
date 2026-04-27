@@ -471,6 +471,224 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
     function limpiarFormulario(){document.querySelectorAll("input, textarea").forEach(el=>{if(!["fechaInforme","fechaFirma"].includes(el.id))el.value=""});document.getElementById("fechaInforme").value=hoy;document.getElementById("fechaFirma").value=hoy}
     function val(id){return document.getElementById(id)?.value||""} function normalizar(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim()} function formatearFecha(f){if(!f)return"";const p=String(f).split("-");return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:f} function escaparHTML(t){return String(t??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")} function limpiarNombreArchivo(n){return n.replace(/[\\/:*?"<>|]/g,"-").replaceAll(" ","_")} function generarNumeroSugerido(){const year=new Date().getFullYear();return `PM-${year}-${String(registroActual?.id||0).padStart(4,"0")}`}
     function mostrarMensaje(tipo,texto){mensaje.className="mensaje "+tipo;textoMensaje.textContent=texto} function ocultarMensaje(){mensaje.className="mensaje";textoMensaje.textContent=""}
+
+    // =====================================================
+    // PDF FINAL: plantilla tipo informe original, completa
+    // Esta función sobrescribe cualquier generarPDF anterior.
+    // =====================================================
+    async function generarPDF(){
+      if(!registroActual){mostrarMensaje("error","Selecciona primero un registro.");return;}
+      const d=datos();
+      const {jsPDF}=window.jspdf;
+      const doc=new jsPDF("p","mm","a4");
+      const W=210,H=297;
+
+      doc.setFont("helvetica","normal");
+      doc.setDrawColor(0,0,0);
+      doc.setLineWidth(0.35);
+      doc.rect(6,6,198,285);
+
+      await cabeceraInformeClasico(doc,d);
+      seccionClasica(doc,"I - DATOS GENERALES / General data",6,38,198);
+      bloqueDatosGenerales(doc,d,42);
+
+      seccionClasica(doc,"II - DATOS TÉCNICOS DEL ENSAYO / Test technique data",6,79,198);
+      bloqueTecnicoCompleto(doc,d,83);
+
+      seccionClasica(doc,"III - REQUERIMIENTOS / Request",6,173,198);
+      bloqueRequerimientos(doc,d,177);
+
+      seccionClasica(doc,"IV - RESULTADOS / Results",6,205,198);
+      bloqueResultados(doc,d,214);
+
+      seccionClasica(doc,"REGISTRO FOTOGRÁFICO / Photographic record",6,246,198);
+      if(d.foto){
+        try{
+          const img=await imagenUrlADataUrl(d.foto);
+          doc.addImage(img,"JPEG",11,253,82,42,undefined,"FAST");
+        }catch(e){
+          texto(doc,"No se pudo insertar la fotografía automáticamente.",11,258,7,false,false);
+        }
+      }
+
+      bloqueFirma(doc,d,266);
+      doc.save(limpiarNombreArchivo(`${d.informe}_${d.referencia}.pdf`));
+      mostrarMensaje("ok","PDF generado con formato tipo informe completo.");
+    }
+
+    async function cabeceraInformeClasico(doc,d){
+      try{
+        const logo=await imagenUrlADataUrl("logo-paramio.jpg");
+        doc.addImage(logo,"JPEG",13,8,36,18,undefined,"FAST");
+      }catch(e){
+        texto(doc,"PARAMIO",14,18,12,true,true);
+      }
+
+      texto(doc,"INFORME DE ENSAYO POR PARTÍCULAS MAGNÉTICAS",105,16,10.5,true,false,"center");
+      texto(doc,"MAGNETIC PARTICLE TESTING REPORT",105,23,7.5,false,false,"center");
+      texto(doc,"PC-03-38",194,13,6.5,false,false,"right");
+      texto(doc,"Rev: 0",194,21,6.5,false,false,"right");
+
+      texto(doc,"Informe Nº:",10,34,7,false,false);
+      texto(doc,d.informe||"-",48,34,7,true,true);
+      doc.line(38,35,78,35);
+      texto(doc,"Fecha:",162,34,7,false,false);
+      texto(doc,formatearFecha(d.fecha)||"-",182,34,7,false,false);
+      doc.line(178,35,201,35);
+    }
+
+    function seccionClasica(doc,t,x,y,w){
+      doc.setFillColor(235,235,235);
+      doc.rect(x,y,w,7,"FD");
+      texto(doc,t,x+2,y+4.8,7.2,true,false);
+    }
+
+    function texto(doc,t,x,y,size=6.3,bold=false,blue=false,align="left"){
+      doc.setFont("helvetica",bold?"bold":"normal");
+      doc.setFontSize(size);
+      doc.setTextColor(blue?0:0,blue?72:0,blue?180:0);
+      doc.text(String(t??""),x,y,{align});
+      doc.setTextColor(0,0,0);
+    }
+
+    function campoLinea(doc,label,value,x,y,labelW=38,lineW=76){
+      texto(doc,label,x,y,5.8,false,false);
+      texto(doc,value||"-",x+labelW,y,6.2,true,true);
+      doc.line(x+labelW-2,y+1,lineW,y+1);
+    }
+
+    function bloqueDatosGenerales(doc,d,y){
+      campoLinea(doc,"CLIENTE:",d.cliente,10,y,32,96);
+      campoLinea(doc,"EXTENSIÓN DEL ENSAYO:",d.extension,112,y,47,201);
+      texto(doc,"Customer",10,y+3.2,4.7,false,false);
+      texto(doc,"Test extension",112,y+3.2,4.7,false,false);
+
+      campoLinea(doc,"PROYECTO/REFERENCIA:",d.referencia,10,y+12,42,96);
+      campoLinea(doc,"MATERIAL:",d.material,112,y+12,30,201);
+      texto(doc,"Proyect/Reference",10,y+15.2,4.7,false,false);
+      texto(doc,"Material",112,y+15.2,4.7,false,false);
+
+      campoLinea(doc,"PIEZAS ENSAYADAS:",d.piezas,10,y+24,38,96);
+      campoLinea(doc,"ESTADO SUPERFICIAL:",d.superficie,112,y+24,39,201);
+      texto(doc,"Tested pieces",10,y+27.2,4.7,false,false);
+      texto(doc,"Surface condition",112,y+27.2,4.7,false,false);
+    }
+
+    function bloqueTecnicoCompleto(doc,d,y){
+      texto(doc,"SISTEMA DE MAGNETIZACIÓN/Magnetic system",10,y,5.9,true,false);
+      texto(doc,"PARTÍCULAS MAGNÉTICAS/Magnetic particles",112,y,5.9,true,false);
+
+      let yy=y+7;
+      campoLinea(doc,"Equipo/código:",d.equipoCodigo,10,yy,31,96);
+      campoLinea(doc,"Marca:",d.marcaParticulas,112,yy,18,158);
+      campoLinea(doc,"Tipo:",d.tipoParticulas,166,yy,13,201);
+      texto(doc,"Equipament/Code",10,yy+3.2,4.6,false,false);
+      texto(doc,"Mark",112,yy+3.2,4.6,false,false);
+      texto(doc,"Type",166,yy+3.2,4.6,false,false);
+
+      yy+=10;
+      campoLinea(doc,"Corriente de magnetización:",d.corriente,10,yy,50,96);
+      campoLinea(doc,"Lote:",d.loteParticulas,112,yy,16,158);
+      campoLinea(doc,"Fecha caducidad:",d.caducidadParticulas,166,yy,31,201);
+      texto(doc,"Magnetic current",10,yy+3.2,4.6,false,false);
+      texto(doc,"Lot",112,yy+3.2,4.6,false,false);
+      texto(doc,"Expired date",166,yy+3.2,4.6,false,false);
+
+      yy+=10;
+      campoLinea(doc,"Secuencia de magnetización:",d.secuencia,10,yy,50,96);
+      campoLinea(doc,"Color:",d.colorParticulas,112,yy,18,201);
+      texto(doc,"Magnetization sequence",10,yy+3.2,4.6,false,false);
+      texto(doc,"Color",112,yy+3.2,4.6,false,false);
+
+      yy+=10;
+      campoLinea(doc,"Patrón Yugo:",d.patronYugo,10,yy,29,96);
+      campoLinea(doc,"Método de aplicación:",d.metodoAplicacion,112,yy,38,201);
+      texto(doc,"Yoke pattern",10,yy+3.2,4.6,false,false);
+      texto(doc,"Aplication method",112,yy+3.2,4.6,false,false);
+
+      yy+=10;
+      campoLinea(doc,"Separación de electrodos:",d.separacion,10,yy,47,96);
+      texto(doc,"LACA DE CONTRASTE / Contrast lacquer",112,yy,5.9,true,false);
+      texto(doc,"Electrode separation",10,yy+3.2,4.6,false,false);
+
+      yy+=10;
+      campoLinea(doc,"Direcciones de magnetización:",d.direcciones,10,yy,51,96);
+      campoLinea(doc,"Marca:",d.lacaMarca,112,yy,18,158);
+      campoLinea(doc,"Tipo:",d.lacaTipo,166,yy,13,201);
+      texto(doc,"Magnetic direction",10,yy+3.2,4.6,false,false);
+      texto(doc,"Mark",112,yy+3.2,4.6,false,false);
+      texto(doc,"Type",166,yy+3.2,4.6,false,false);
+
+      yy+=10;
+      campoLinea(doc,"Iluminación:",d.iluminacion,10,yy,25,96);
+      campoLinea(doc,"Lote:",d.lacaLote,112,yy,16,158);
+      campoLinea(doc,"Fecha caducidad:",d.lacaCaducidad,166,yy,31,201);
+      texto(doc,"Ilumination",10,yy+3.2,4.6,false,false);
+      texto(doc,"Lot",112,yy+3.2,4.6,false,false);
+      texto(doc,"Expired date",166,yy+3.2,4.6,false,false);
+
+      yy+=10;
+      campoLinea(doc,"Luxómetro:",d.luxometro,10,yy,25,96);
+      texto(doc,"LIMPIEZA DE LA PIEZA / Cleaning the piece",112,yy,5.9,true,false);
+      texto(doc,"Luxometer",10,yy+3.2,4.6,false,false);
+
+      yy+=10;
+      campoLinea(doc,"Campo residual:",d.campoResidual,10,yy,32,96);
+      campoLinea(doc,"Limpieza previa:",d.limpiezaPrevia,112,yy,32,145);
+      campoLinea(doc,"Producto:",d.productoLimpieza,148,yy,19,173);
+      campoLinea(doc,"Marca:",d.marcaLimpieza,176,yy,16,201);
+      texto(doc,"Residual field",10,yy+3.2,4.6,false,false);
+      texto(doc,"Pre-cleaning",112,yy+3.2,4.6,false,false);
+      texto(doc,"Product",148,yy+3.2,4.6,false,false);
+      texto(doc,"Mark",176,yy+3.2,4.6,false,false);
+
+      yy+=10;
+      campoLinea(doc,"Indicador de campo:",d.indicadorCampo,10,yy,38,96);
+      campoLinea(doc,"Limpieza final:",d.limpiezaFinal,112,yy,31,145);
+      campoLinea(doc,"Lote:","--",148,yy,14,173);
+      campoLinea(doc,"Tipo:","--",176,yy,13,201);
+      texto(doc,"Feel indication",10,yy+3.2,4.6,false,false);
+      texto(doc,"Final cleaning",112,yy+3.2,4.6,false,false);
+      texto(doc,"Lot",148,yy+3.2,4.6,false,false);
+      texto(doc,"Type",176,yy+3.2,4.6,false,false);
+    }
+
+    function bloqueRequerimientos(doc,d,y){
+      texto(doc,"INSPECCIÓN / Inspection:",10,y,6,true,false);
+      const insp=doc.splitTextToSize(d.inspeccion||"-",70);
+      texto(doc,insp,45,y,5.8,true,true);
+      texto(doc,"EVALUACIÓN / Evaluation:",112,y,6,true,false);
+      const evalTxt=doc.splitTextToSize(d.evaluacion||"-",45);
+      texto(doc,evalTxt,157,y,5.8,true,true);
+      texto(doc,"Nivel de severidad:",112,y+17,6,false,false);
+      texto(doc,"Severity level",112,y+20,4.7,false,false);
+      texto(doc,d.nivel||"-",157,y+17,5.8,true,true);
+    }
+
+    function bloqueResultados(doc,d,y){
+      texto(doc,"(Las piezas con resultado rechazada, se adjunta croquis o fotografía en anexo hoja 2)",73,y-4,5.4,false,false,"center");
+      texto(doc,"(Pieces with rejected results, a sketch or photo is attached in annex sheet 2)",73,y-.5,5.2,false,false,"center");
+      doc.autoTable({
+        startY:y,theme:"grid",margin:{left:6,right:6},tableWidth:198,
+        styles:{fontSize:5.7,cellPadding:1.1,lineColor:[0,0,0],lineWidth:.25,halign:"center",valign:"middle"},
+        head:[["PIEZAS/Parts","Nº INDICACIONES
+Nº indications","SITUACIÓN / Situation
+X","Y","LONGITUD / Length","RESULTADO / Result"]],
+        body:[[d.resultadoPiezas,d.indicaciones,d.x,d.y,d.longitud,d.resultado],["","","","","",""]],
+        headStyles:{fillColor:[255,255,255],textColor:[0,0,0],fontStyle:"bold"},
+        columnStyles:{0:{cellWidth:20},1:{cellWidth:31},2:{cellWidth:20},3:{cellWidth:20},4:{cellWidth:55},5:{cellWidth:52,fontStyle:"bold",textColor:d.resultado==="NO APTO"?[220,38,38]:[0,90,40]}}
+      });
+    }
+
+    function bloqueFirma(doc,d,y){
+      doc.autoTable({
+        startY:y,theme:"grid",margin:{left:6,right:6},tableWidth:198,
+        styles:{fontSize:5.7,cellPadding:1.1,lineColor:[0,0,0],lineWidth:.25,halign:"center",valign:"middle"},
+        body:[["","REALIZADO / Producer","APROBADO / Approved"],["NOMBRE/Name:",d.realizado,d.aprobado||""],["NIVEL/Level:",d.nivelInspector,""],["FIRMA/Signe:","",""],["FECHA/Date:",formatearFecha(d.fechaFirma),""]],
+        columnStyles:{0:{cellWidth:50,fontStyle:"bold"},1:{cellWidth:90,textColor:[0,62,160],fontStyle:"bold"},2:{cellWidth:58}}
+      });
+    }
+
     cargarRegistros();
   </script>
 </body>
