@@ -631,12 +631,18 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         .eq("id", registroActual.id);
 
       if (error) {
-        mostrarMensaje("error", "ERROR guardando informe: " + error.message + ". ATENCIÓN: revisa el registro antes de volver a intentarlo.");
-        alert("ERROR guardando informe: " + error.message + "
+  mostrarMensaje(
+    "error",
+    "ERROR guardando informe: " + error.message + ". ATENCIÓN: revisa el registro antes de volver a intentarlo."
+  );
 
-Revisa Supabase antes de volver a guardar para no generar dudas con la numeración.");
-        return;
-      }
+  alert(
+    "ERROR guardando informe: " + error.message +
+    "\n\nRevisa Supabase antes de volver a guardar para no generar dudas con la numeración."
+  );
+
+  return;
+}
 
       registroActual.numero_informe_final = numeroFinal;
       registroActual.informe_particulas = numeroFinal;
