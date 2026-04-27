@@ -654,9 +654,14 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       doc.autoTable({
         startY:y,theme:"grid",margin:{left:6,right:6},tableWidth:198,
         styles:{fontSize:5.7,cellPadding:1.1,lineColor:[0,0,0],lineWidth:.25,halign:"center",valign:"middle"},
-        head:[["PIEZAS/Parts","Nº INDICACIONES
-Nº indications","SITUACIÓN / Situation
-X","Y","LONGITUD / Length","RESULTADO / Result"]],
+        head: [[
+  "PIEZAS/Parts",
+  "Nº INDICACIONES\nNº indications",
+  "SITUACIÓN / Situation\nX",
+  "Y",
+  "LONGITUD / Length",
+  "RESULTADO / Result"
+]],
         body:[[d.resultadoPiezas,d.indicaciones,d.x,d.y,d.longitud,d.resultado],["","","","","",""]],
         headStyles:{fillColor:[255,255,255],textColor:[0,0,0],fontStyle:"bold"},
         columnStyles:{0:{cellWidth:20},1:{cellWidth:31},2:{cellWidth:20},3:{cellWidth:20},4:{cellWidth:55},5:{cellWidth:52,fontStyle:"bold",textColor:d.resultado==="NO APTO"?[220,38,38]:[0,90,40]}}
