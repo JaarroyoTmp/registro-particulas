@@ -334,29 +334,120 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       const {jsPDF}=window.jspdf;
       const doc=new jsPDF("p","mm","a4");
       const W=210,H=297;
-      doc.setFont("helvetica","normal");
-      doc.setDrawColor(0); doc.setLineWidth(.4);
-      doc.rect(5,5,200,287);
-      await headerPlantilla(doc,d,W);
 
-      section(doc,"I - DATOS GENERALES / General data",5,36,200);
-      tablaGeneral(doc,d,39);
-      section(doc,"II - DATOS TECNICOS DEL ENSAYO / Test tecnique data",5,76,200);
-      tablaTecnica(doc,d,79);
-      section(doc,"III - REQUERIMIENTOS / Request",5,172,200);
-      tablaRequerimientos(doc,d,175);
-      section(doc,"IV - RESULTADOS / Results",5,204,200);
-      tablaResultados(doc,d,213);
-      section(doc,"REGISTRO FOTOGRÁFICO / Photographic record",5,245,200);
+      await cabeceraElegante(doc,d,W);
 
-      if(d.foto){
-        try{const img=await imagenUrlADataUrl(d.foto);doc.addImage(img,"JPEG",10,252,80,35,undefined,"FAST");}
-        catch(e){doc.setFontSize(7);doc.text("No se pudo insertar la fotografía automáticamente.",10,257);}
+      let y=42;
+      y=bloqueTitulo(doc,"I - DATOS GENERALES / General data",y);
+      y=tablaElegante(doc,y,[
+        ["Informe Nº",d.informe,"Fecha",formatearFecha(d.fecha)],
+        ["Cliente / Customer",d.cliente,"Extensión del ensayo / Test extension",d.extension],
+        ["Proyecto / Referencia",d.referencia,"Material",d.material],
+        ["Piezas ensayadas / Tested pieces",d.piezas,"Estado superficial / Surface condition",d.superficie]
+      ]);
+
+      y=bloqueTitulo(doc,"II - DATOS TÉCNICOS DEL ENSAYO / Test technique data",y+5);
+      y=subBloque(doc,"Sistema de magnetización / Magnetic system",y);
+      y=tablaElegante(doc,y,[
+        ["Equipo / código",d.equipoCodigo,"Corriente de magnetización",d.corriente],
+        ["Secuencia de magnetización",d.secuencia,"Direcciones de magnetización",d.direcciones],
+        ["Patrón yugo",d.patronYugo,"Separación de electrodos",d.separacion],
+        ["Iluminación",d.iluminacion,"Luxómetro",d.luxometro],
+        ["Campo residual",d.campoResidual,"Indicador de campo",d.indicadorCampo]
+      ]);
+
+      y=subBloque(doc,"Partículas magnéticas / Magnetic particles",y+3);
+      y=tablaElegante(doc,y,[
+        ["Marca",d.marcaParticulas,"Tipo",d.tipoParticulas],
+        ["Lote",d.loteParticulas,"Fecha caducidad",d.caducidadParticulas],
+        ["Color",d.colorParticulas,"Método de aplicación",d.metodoAplicacion]
+      ]);
+
+      y=subBloque(doc,"Laca de contraste y limpieza / Contrast lacquer and cleaning",y+3);
+      y=tablaElegante(doc,y,[
+        ["Laca marca",d.lacaMarca,"Laca tipo",d.lacaTipo],
+        ["Laca lote",d.lacaLote,"Laca caducidad",d.lacaCaducidad],
+        ["Limpieza previa",d.limpiezaPrevia,"Limpieza final",d.limpiezaFinal],
+        ["Producto limpieza",d.productoLimpieza,"Marca limpieza",d.marcaLimpieza]
+      ]);
+
+      if(y>225){pieElegante(doc,W,H);doc.addPage();await cabeceraElegante(doc,d,W);y=42;}
+      y=bloqueTitulo(doc,"III - REQUERIMIENTOS / Request",y+5);
+      y=tablaElegante(doc,y,[
+        ["Inspección / Inspection",d.inspeccion,"Evaluación / Evaluation",d.evaluacion],
+        ["Nivel de severidad / Severity level",d.nivel,"","" ]
+      ],true);
+
+      y=bloqueTitulo(doc,"IV - RESULTADOS / Results",y+5);
+      doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(80,80,80);
+      doc.text("Las piezas con resultado rechazada, se adjunta croquis o fotografía en anexo.",14,y); y+=4;
+      y=tablaResultadosElegante(doc,y,d);
+
+      if(d.observaciones){
+        y=bloqueTitulo(doc,"OBSERVACIONES / Remarks",y+5);
+        doc.autoTable({startY:y,theme:"grid",margin:{left:14,right:14},styles:{fontSize:8.5,cellPadding:3,lineColor:[210,218,232],lineWidth:.2,valign:"top"},body:[[d.observaciones]],columnStyles:{0:{cellWidth:182}},tableWidth:182});
+        y=doc.lastAutoTable.finalY;
       }
 
-      tablaFirma(doc,d,270);
+      if(y>205){pieElegante(doc,W,H);doc.addPage();await cabeceraElegante(doc,d,W);y=42;}
+      y=bloqueTitulo(doc,"REGISTRO FOTOGRÁFICO / Photographic record",y+6);
+      if(d.foto){
+        try{
+          const img=await imagenUrlADataUrl(d.foto);
+          doc.addImage(img,"JPEG",14,y,82,58,undefined,"FAST");
+          doc.setFontSize(7.5);doc.setTextColor(100,100,100);doc.text("Fotografía asociada al registro de ensayo.",14,y+63);
+        }catch(e){
+          doc.setFontSize(8);doc.setTextColor(220,38,38);doc.text("No se pudo insertar la fotografía automáticamente.",14,y+8);
+        }
+      }else{
+        doc.setFontSize(9);doc.setTextColor(120,120,120);doc.text("Sin fotografía asociada.",14,y+10);
+      }
+
+      tablaFirmaElegante(doc,d,245);
+      pieElegante(doc,W,H);
       doc.save(limpiarNombreArchivo(`${d.informe}_${d.referencia}.pdf`));
-      mostrarMensaje("ok","PDF generado con formato tipo plantilla.");
+      mostrarMensaje("ok","PDF generado con plantilla elegante completa.");
+    }
+
+    async function cabeceraElegante(doc,d,W){
+      doc.setFillColor(8,43,85);doc.rect(0,0,W,30,"F");
+      doc.setFillColor(255,121,0);doc.rect(0,30,W,2.2,"F");
+      try{const logo=await imagenUrlADataUrl("logo-paramio.jpg");doc.addImage(logo,"JPEG",12,6,42,17,undefined,"FAST");}catch(e){doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(14);doc.text("PARAMIO",14,17)}
+      doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(13);doc.text("INFORME DE ENSAYO POR PARTÍCULAS MAGNÉTICAS",62,13);
+      doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.text("MAGNETIC PARTICLE TESTING REPORT · PC-03-38 · Rev. 0",62,20);
+      doc.setFont("helvetica","bold");doc.setFontSize(8);doc.text(`Informe Nº: ${d.informe||"-"}`,W-14,12,{align:"right"});doc.text(`Fecha: ${formatearFecha(d.fecha)||"-"}`,W-14,20,{align:"right"});
+      doc.setTextColor(0,0,0);
+    }
+
+    function bloqueTitulo(doc,t,y){
+      doc.setFillColor(8,43,85);doc.roundedRect(14,y,182,8,1.6,1.6,"F");
+      doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.text(t,17,y+5.3);doc.setTextColor(0,0,0);return y+10;
+    }
+
+    function subBloque(doc,t,y){
+      doc.setFillColor(232,240,252);doc.roundedRect(14,y,182,6.5,1.2,1.2,"F");
+      doc.setTextColor(8,43,85);doc.setFont("helvetica","bold");doc.setFontSize(8);doc.text(t,17,y+4.5);doc.setTextColor(0,0,0);return y+8;
+    }
+
+    function tablaElegante(doc,y,rows,alto=false){
+      doc.autoTable({startY:y,theme:"grid",margin:{left:14,right:14},styles:{fontSize:7.7,cellPadding:2.4,lineColor:[210,218,232],lineWidth:.2,valign:"top"},body:rows,tableWidth:182,columnStyles:{0:{fontStyle:"bold",fillColor:[245,247,251],cellWidth:42},1:{textColor:[0,62,160],fontStyle:"bold",cellWidth:49},2:{fontStyle:"bold",fillColor:[245,247,251],cellWidth:42},3:{textColor:[0,62,160],fontStyle:"bold",cellWidth:49}},didParseCell:function(data){if(alto && (data.column.index===1||data.column.index===3)){data.cell.styles.minCellHeight=14;}}});
+      return doc.lastAutoTable.finalY;
+    }
+
+    function tablaResultadosElegante(doc,y,d){
+      doc.autoTable({startY:y,theme:"grid",margin:{left:14,right:14},styles:{fontSize:7.5,cellPadding:2.2,lineColor:[210,218,232],lineWidth:.2,halign:"center"},head:[["PIEZAS/Parts","Nº INDICACIONES","SITUACIÓN X","SITUACIÓN Y","LONGITUD / Length","RESULTADO / Result"]],body:[[d.resultadoPiezas,d.indicaciones,d.x,d.y,d.longitud,d.resultado],["","","","","",""]],headStyles:{fillColor:[0,216,216],textColor:[0,31,51],fontStyle:"bold"},columnStyles:{5:{fontStyle:"bold",textColor:d.resultado==="NO APTO"?[220,38,38]:[22,156,69]}}});
+      return doc.lastAutoTable.finalY;
+    }
+
+    function tablaFirmaElegante(doc,d,y){
+      doc.autoTable({startY:y,theme:"grid",margin:{left:14,right:14},styles:{fontSize:7,cellPadding:2,lineColor:[120,120,120],lineWidth:.25,halign:"center"},body:[["","REALIZADO / Producer","APROBADO / Approved"],["NOMBRE/Name:",d.realizado,d.aprobado||""],["NIVEL/Level:",d.nivelInspector,""],["FIRMA/Signe:","",""],["FECHA/Date:",formatearFecha(d.fechaFirma),""]],columnStyles:{0:{cellWidth:45,fontStyle:"bold",fillColor:[245,247,251]},1:{cellWidth:91,textColor:[0,62,160],fontStyle:"bold"},2:{cellWidth:46}}});
+    }
+
+    function pieElegante(doc,W,H){
+      doc.setDrawColor(255,121,0);doc.setLineWidth(.5);doc.line(14,H-14,W-14,H-14);
+      doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(100,100,100);
+      doc.text("Documento generado automáticamente desde el sistema de registro de partículas magnéticas.",14,H-9);
+      doc.text(`Página ${doc.internal.getNumberOfPages()}`,W-14,H-9,{align:"right"});doc.setTextColor(0,0,0);
     }
 
     async function headerPlantilla(doc,d,W){
