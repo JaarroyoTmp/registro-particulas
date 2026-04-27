@@ -929,17 +929,31 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         }
       });
 
-      // Firma digitalizada. Sube el archivo firma.jpeg al mismo repositorio que informe.html.
-      // Si tu archivo se llama firma.jpg o firma.png, cambia el nombre aquí.
-      try {
-        const firma = await imagenUrlADataUrl("https://raw.githubusercontent.com/JaaarroyoTmp/registro-particulas/main/firma.png");
+      // Firma digitalizada. El sistema prueba varios nombres posibles.
+      const posiblesFirmas = ["firma.png", "firma.jpeg", "firma.jpg"];
+      let firmaCargada = null;
+      let tipoFirma = "PNG";
+
+      for (const archivo of posiblesFirmas) {
+        try {
+          firmaCargada = await imagenUrlADataUrl(archivo);
+          tipoFirma = archivo.toLowerCase().endsWith("png") ? "PNG" : "JPEG";
+          break;
+        } catch (e) {
+          console.log("No encontrada o no cargable:", archivo);
+        }
+      }
+
+      if (firmaCargada) {
         const paginaFirma = doc.internal.getNumberOfPages();
         doc.setPage(paginaFirma);
 
-        const yFirma = doc.lastAutoTable.finalY - 28;
-        doc.addImage(firma, "PNG", 76, yFirma, 38, 15, undefined, "FAST");
-      } catch (e) {
-        console.log("No se pudo cargar firma.jpeg", e);
+        // Coordenadas dentro de la celda FIRMA/Signe, columna REALIZADO.
+        const firmaX = 76;
+        const firmaY = y + 32;
+        doc.addImage(firmaCargada, tipoFirma, firmaX, firmaY, 38, 13, undefined, "FAST");
+      } else {
+        console.log("No se pudo cargar ninguna firma. Sube firma.png, firma.jpeg o firma.jpg al repositorio.");
       }
     }
 
