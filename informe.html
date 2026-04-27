@@ -252,7 +252,7 @@
     <div class="separador"></div>
     <div class="titulo">
       <h1>Generador de Informe de Partículas Magnéticas</h1>
-      <p>Diseño corporativo + contenido técnico completo · Procedimiento PC-03-38</p>
+      <p>Diseño corporativo + contenido técnico completo · PC-03-38</p>
     </div>
   </header>
 
@@ -683,7 +683,16 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.5);
-      doc.text(`Nº Informe: ${d.informe || "-"}`, 17, 56);
+      doc.setFillColor(232, 240, 252);
+      doc.roundedRect(17, 51, 72, 10, 1.5, 1.5, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10.5);
+      doc.setTextColor(8, 43, 85);
+      doc.text(`Nº Informe: ${d.informe || "-"}`, 20, 57.5);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(0, 0, 0);
       doc.text(`Fecha informe: ${formatearFecha(d.fecha) || "-"}`, 143, 56);
 
       let y = 68;
@@ -840,7 +849,7 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       doc.setFont("helvetica", "normal");
       doc.text("Partículas Magnéticas", W - 14, 20, { align: "right" });
       doc.setFontSize(8);
-      doc.text("Procedimiento PC-03-38 · Rev. 0", W - 14, 26, { align: "right" });
+      doc.text("PC-03-38 · Rev. 0", W - 14, 26, { align: "right" });
       doc.setTextColor(0, 0, 0);
     }
 
@@ -900,6 +909,8 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         theme: "grid",
         margin: { left: 17, right: 17 },
         tableWidth: 176,
+        pageBreak: "avoid",
+        rowPageBreak: "avoid",
         styles: { fontSize: 7, cellPadding: 2, lineColor: [180, 180, 180], lineWidth: 0.25, halign: "center", valign: "middle" },
         body: [
           ["", "REALIZADO / Producer", "APROBADO / Approved"],
@@ -910,19 +921,23 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         ],
         columnStyles: {
           0: { cellWidth: 44, fontStyle: "bold", fillColor: [245, 247, 251] },
-          1: { cellWidth: 88, textColor: [0, 62, 160], fontStyle: "bold", minCellHeight: 12 },
+          1: { cellWidth: 88, textColor: [0, 62, 160], fontStyle: "bold" },
           2: { cellWidth: 44 }
         },
         didParseCell: function (data) {
-          if (data.row.index === 3) data.cell.styles.minCellHeight = 16;
+          if (data.row.index === 3) data.cell.styles.minCellHeight = 22;
         }
       });
 
       // Firma digitalizada. Sube el archivo firma.jpeg al mismo repositorio que informe.html.
+      // Si tu archivo se llama firma.jpg o firma.png, cambia el nombre aquí.
       try {
         const firma = await imagenUrlADataUrl("firma.jpeg");
-        // Posición dentro de la celda REALIZADO / Producer, fila FIRMA/Signe.
-        doc.addImage(firma, "JPEG", 73, y + 24, 45, 14, undefined, "FAST");
+        const paginaFirma = doc.internal.getNumberOfPages();
+        doc.setPage(paginaFirma);
+
+        const yFirma = doc.lastAutoTable.finalY - 28;
+        doc.addImage(firma, "JPEG", 76, yFirma, 38, 15, undefined, "FAST");
       } catch (e) {
         console.log("No se pudo cargar firma.jpeg", e);
       }
