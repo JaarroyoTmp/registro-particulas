@@ -3,357 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Generador de Informe - Partículas Magnéticas</title>
-
+  <title>Informe Partículas Magnéticas</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 
   <style>
-    :root {
-      --azul: #082b55;
-      --azul-claro: #0b63ce;
-      --naranja: #ff7900;
-      --cyan: #00d8d8;
-      --fondo: #f5f7fb;
-      --borde: #d8dde8;
-      --texto: #1f2937;
-      --verde: #169c45;
-      --rojo: #dc2626;
-      --amarillo: #f28c00;
-      --gris: #64748b;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--fondo);
-      color: var(--texto);
-    }
-
-    .cabecera {
-      background: var(--azul);
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 28px;
-      padding: 18px 32px;
-      border-bottom: 4px solid var(--naranja);
-    }
-
-    .cabecera img {
-      width: 230px;
-      max-height: 90px;
-      object-fit: contain;
-    }
-
-    .separador {
-      width: 1px;
-      height: 70px;
-      background: rgba(255, 255, 255, 0.35);
-    }
-
-    .titulo h1 {
-      margin: 0 0 8px 0;
-      font-size: 30px;
-      color: white;
-    }
-
-    .titulo p {
-      margin: 0;
-      font-size: 17px;
-      color: #dbeafe;
-    }
-
-    main { padding: 32px; }
-
-    .tarjeta {
-      background: white;
-      border: 1px solid var(--borde);
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-      padding: 28px;
-      margin-bottom: 28px;
-    }
-
-    .titulo-seccion {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      color: var(--azul-claro);
-      font-size: 18px;
-      font-weight: 900;
-      text-transform: uppercase;
-      margin-bottom: 24px;
-    }
-
-    .subtitulo {
-      color: var(--gris);
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: none;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 22px;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 22px;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 22px;
-    }
-
-    label {
-      display: block;
-      font-weight: 800;
-      font-size: 13px;
-      margin-bottom: 8px;
-      color: #2f3542;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 5px;
-      font-size: 15px;
-      background: white;
-      font-family: inherit;
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: 2px solid rgba(11, 99, 206, 0.25);
-      border-color: var(--azul-claro);
-    }
-
-    .campo {
-      margin-bottom: 18px;
-    }
-
-    .mensaje {
-      display: none;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 18px 22px;
-      border-radius: 8px;
-      font-weight: 800;
-      margin-bottom: 28px;
-    }
-
-    .mensaje.ok {
-      display: flex;
-      color: #08752e;
-      background: #e9fbee;
-      border: 1px solid #9ee7b1;
-    }
-
-    .mensaje.error {
-      display: flex;
-      color: #991b1b;
-      background: #fee2e2;
-      border: 1px solid #fca5a5;
-    }
-
-    .mensaje.info {
-      display: flex;
-      color: #1e40af;
-      background: #dbeafe;
-      border: 1px solid #93c5fd;
-    }
-
-    .cerrar-mensaje {
-      background: transparent;
-      color: inherit;
-      font-size: 22px;
-      padding: 0;
-      border: none;
-      cursor: pointer;
-    }
-
-    .acciones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    button {
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 800;
-      transition: 0.2s;
-      padding: 13px 18px;
-      font-size: 15px;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-primario {
-      background: var(--azul-claro);
-      color: white;
-    }
-
-    .btn-primario:hover { background: #084fb0; }
-
-    .btn-secundario {
-      background: var(--naranja);
-      color: white;
-    }
-
-    .btn-secundario:hover { background: #d96500; }
-
-    .btn-gris {
-      background: #e2e8f0;
-      color: #1f2937;
-    }
-
-    .btn-gris:hover { background: #cbd5e1; }
-
-    .btn-verde {
-      background: var(--verde);
-      color: white;
-    }
-
-    .btn-verde:hover { background: #08752e; }
-
-    .resumen-registro {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 14px;
-      margin-top: 18px;
-    }
-
-    .dato {
-      border: 1px solid var(--borde);
-      border-radius: 6px;
-      padding: 14px;
-      background: #fafafa;
-    }
-
-    .dato span {
-      display: block;
-      font-size: 12px;
-      font-weight: 900;
-      color: var(--gris);
-      margin-bottom: 6px;
-    }
-
-    .dato strong {
-      font-size: 16px;
-      color: var(--texto);
-    }
-
-    .fotos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 14px;
-      margin-top: 12px;
-    }
-
-    .foto-card {
-      border: 1px solid var(--borde);
-      border-radius: 8px;
-      padding: 10px;
-      background: #fafafa;
-    }
-
-    .foto-card img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 6px;
-      background: #e5e7eb;
-    }
-
-    .foto-card a {
-      display: block;
-      margin-top: 8px;
-      font-weight: 800;
-      color: var(--azul-claro);
-      text-decoration: none;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      background: white;
-    }
-
-    th, td {
-      border: 1px solid #d4dbe8;
-      padding: 12px 14px;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    th {
-      background: var(--cyan);
-      color: #001f33;
-      font-weight: 900;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 5px 9px;
-      border-radius: 999px;
-      font-weight: 900;
-      font-size: 12px;
-    }
-
-    .badge-pendiente {
-      color: #92400e;
-      background: #fef3c7;
-    }
-
-    .badge-realizado {
-      color: #08752e;
-      background: #dcfce7;
-    }
-
-    .oculto { display: none; }
-
-    footer {
-      text-align: center;
-      color: #7a7f89;
-      font-size: 13px;
-      padding: 10px 30px 28px;
-    }
-
-    @media (max-width: 1100px) {
-      .grid-4, .grid-3, .resumen-registro { grid-template-columns: 1fr 1fr; }
-    }
-
-    @media (max-width: 700px) {
-      main { padding: 18px; }
-      .grid-4, .grid-3, .grid-2, .resumen-registro { grid-template-columns: 1fr; }
-      .cabecera { flex-direction: column; align-items: flex-start; }
-      .separador { display: none; }
-      .cabecera img { width: 210px; }
-      .titulo h1 { font-size: 24px; }
-      .acciones button { width: 100%; }
-    }
+    :root{--azul:#082b55;--naranja:#ff7900;--cyan:#00d8d8;--fondo:#f5f7fb;--borde:#d8dde8;--texto:#1f2937;--verde:#169c45;--rojo:#dc2626;--gris:#64748b}
+    *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--fondo);color:var(--texto)}
+    .cabecera{background:var(--azul);color:#fff;display:flex;align-items:center;gap:28px;padding:18px 32px;border-bottom:4px solid var(--naranja)}
+    .cabecera img{width:230px;max-height:90px;object-fit:contain}.separador{width:1px;height:70px;background:rgba(255,255,255,.35)}
+    .titulo h1{margin:0 0 8px 0;font-size:30px}.titulo p{margin:0;font-size:16px;color:#dbeafe} main{padding:28px}
+    .tarjeta{background:#fff;border:1px solid var(--borde);border-radius:8px;box-shadow:0 2px 8px rgba(15,23,42,.08);padding:26px;margin-bottom:24px}
+    .titulo-seccion{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#0b63ce;font-size:18px;font-weight:900;text-transform:uppercase;margin-bottom:20px}.subtitulo{color:var(--gris);font-size:13px;text-transform:none}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    label{display:block;font-weight:800;font-size:12px;margin-bottom:7px;color:#2f3542;text-transform:uppercase} input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:5px;font-size:14px;background:#fff;font-family:inherit} textarea{min-height:80px;resize:vertical}.campo{margin-bottom:16px}
+    .acciones{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px} button{border:none;border-radius:5px;cursor:pointer;font-weight:800;padding:12px 16px;font-size:14px}.btn-primario{background:#0b63ce;color:#fff}.btn-secundario{background:var(--naranja);color:#fff}.btn-gris{background:#e2e8f0;color:#111827}.btn-verde{background:var(--verde);color:#fff}
+    .mensaje{display:none;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-radius:8px;font-weight:800;margin-bottom:22px}.mensaje.ok{display:flex;color:#08752e;background:#e9fbee;border:1px solid #9ee7b1}.mensaje.error{display:flex;color:#991b1b;background:#fee2e2;border:1px solid #fca5a5}.mensaje.info{display:flex;color:#1e40af;background:#dbeafe;border:1px solid #93c5fd}.cerrar-mensaje{background:transparent;color:inherit;font-size:22px;padding:0}
+    .resumen{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:14px}.dato{border:1px solid var(--borde);border-radius:6px;padding:12px;background:#fafafa}.dato span{display:block;font-size:11px;font-weight:900;color:var(--gris);margin-bottom:5px}.dato strong{font-size:15px}
+    .fotos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}.foto-card{border:1px solid var(--borde);border-radius:8px;padding:10px;background:#fafafa}.foto-card img{width:100%;height:150px;object-fit:cover;border-radius:6px;background:#e5e7eb}.foto-card a{display:block;margin-top:8px;font-weight:800;color:#0b63ce;text-decoration:none}
+    table{border-collapse:collapse;width:100%;background:#fff}th,td{border:1px solid #d4dbe8;padding:10px 12px;text-align:left;font-size:13px}th{background:var(--cyan);color:#001f33;font-weight:900}.oculto{display:none} footer{text-align:center;color:#7a7f89;font-size:13px;padding:10px 30px 28px}
+    @media(max-width:1100px){.grid-4,.grid-3,.resumen{grid-template-columns:1fr 1fr}} @media(max-width:700px){main{padding:16px}.grid-4,.grid-3,.grid-2,.resumen{grid-template-columns:1fr}.cabecera{flex-direction:column;align-items:flex-start}.separador{display:none}.cabecera img{width:210px}.titulo h1{font-size:23px}.acciones button{width:100%}}
   </style>
 </head>
 
@@ -363,201 +33,176 @@
     <div class="separador"></div>
     <div class="titulo">
       <h1>Generador de Informe de Partículas Magnéticas</h1>
-      <p>Creación de informe PDF a partir de registros guardados en Supabase</p>
+      <p>Plantilla tipo PC-03-38 · Magnetic Particle Testing Report</p>
     </div>
   </header>
 
   <main>
-    <div id="mensaje" class="mensaje">
-      <span id="textoMensaje"></span>
-      <button class="cerrar-mensaje" id="btnCerrarMensaje">×</button>
-    </div>
+    <div id="mensaje" class="mensaje"><span id="textoMensaje"></span><button class="cerrar-mensaje" id="btnCerrarMensaje">×</button></div>
 
     <section class="tarjeta">
-      <div class="titulo-seccion">
-        <span>🔎 Seleccionar registro</span>
-        <span class="subtitulo">Datos leídos desde Supabase</span>
-      </div>
-
+      <div class="titulo-seccion"><span>🔎 Seleccionar registro</span><span class="subtitulo">Datos leídos desde Supabase</span></div>
       <div class="grid-2">
-        <div class="campo">
-          <label for="selectorRegistro">REGISTRO</label>
-          <select id="selectorRegistro">
-            <option value="">Cargando registros...</option>
-          </select>
-        </div>
-
-        <div class="campo">
-          <label for="filtroEstado">FILTRO</label>
-          <select id="filtroEstado">
-            <option value="todos">Todos</option>
-            <option value="pendientes">Pendientes de informe</option>
-            <option value="realizados">Con informe</option>
-          </select>
-        </div>
+        <div class="campo"><label>Registro</label><select id="selectorRegistro"><option>Cargando registros...</option></select></div>
+        <div class="campo"><label>Filtro</label><select id="filtroEstado"><option value="todos">Todos</option><option value="pendientes">Pendientes de informe</option><option value="realizados">Con informe</option></select></div>
       </div>
-
-      <div class="acciones">
-        <button type="button" class="btn-gris" id="btnRecargar">🔄 Recargar registros</button>
-        <button type="button" class="btn-secundario" id="btnLimpiar">🧹 Limpiar formulario</button>
-      </div>
-
-      <div id="resumenRegistro" class="resumen-registro oculto">
-        <div class="dato"><span>FECHA REGISTRO</span><strong id="resFecha">-</strong></div>
-        <div class="dato"><span>REFERENCIA</span><strong id="resReferencia">-</strong></div>
-        <div class="dato"><span>CANTIDAD</span><strong id="resCantidad">-</strong></div>
-        <div class="dato"><span>EQUIPO</span><strong id="resEquipo">-</strong></div>
-        <div class="dato"><span>ESTADO</span><strong id="resEstado">-</strong></div>
+      <div class="acciones"><button class="btn-gris" id="btnRecargar">🔄 Recargar</button><button class="btn-secundario" id="btnLimpiar">🧹 Limpiar formulario</button></div>
+      <div id="resumenRegistro" class="resumen oculto">
+        <div class="dato"><span>Fecha registro</span><strong id="resFecha">-</strong></div><div class="dato"><span>Referencia</span><strong id="resReferencia">-</strong></div><div class="dato"><span>Cantidad</span><strong id="resCantidad">-</strong></div><div class="dato"><span>Equipo</span><strong id="resEquipo">-</strong></div><div class="dato"><span>Nº auto</span><strong id="resNumero">-</strong></div>
       </div>
     </section>
 
     <section class="tarjeta">
-      <div class="titulo-seccion">
-        <span>🧾 Datos del informe</span>
-        <span class="subtitulo">Campos editables antes de generar PDF</span>
+      <div class="titulo-seccion"><span>📋 I - Datos generales</span><span class="subtitulo">Equivalente a General data</span></div>
+      <div class="grid-4">
+        <div class="campo"><label>Nº informe</label><input id="numeroInforme" placeholder="Ej: 2026-089" required></div>
+        <div class="campo"><label>Fecha informe</label><input type="date" id="fechaInforme" required></div>
+        <div class="campo"><label>Cliente</label><input id="cliente" placeholder="Ej: Patentes Talgo"></div>
+        <div class="campo"><label>Extensión ensayo</label><input id="extensionEnsayo" value="100% Mecanizado"></div>
       </div>
-
-      <form id="formInforme">
-        <div class="grid-4">
-          <div class="campo">
-            <label for="numeroInforme">Nº INFORME</label>
-            <input type="text" id="numeroInforme" placeholder="Ej: PM-2026-001" required />
-          </div>
-
-          <div class="campo">
-            <label for="fechaInforme">FECHA INFORME</label>
-            <input type="date" id="fechaInforme" required />
-          </div>
-
-          <div class="campo">
-            <label for="cliente">CLIENTE</label>
-            <input type="text" id="cliente" placeholder="Ej: Talleres Mecánicos Paramio" />
-          </div>
-
-          <div class="campo">
-            <label for="operario">OPERARIO / INSPECTOR</label>
-            <input type="text" id="operario" placeholder="Nombre del operario" />
-          </div>
-        </div>
-
-        <div class="grid-4">
-          <div class="campo">
-            <label for="norma">NORMA / PROCEDIMIENTO</label>
-            <select id="norma">
-              <option value="UNE-EN 1369(2013) / ET-022">TALGO: UNE-EN 1369(2013) / ET-022</option>
-              <option value="UNE-EN ISO 9934-1 / UNE-EN ISO 3059">UNE-EN ISO 9934-1 / UNE-EN ISO 3059</option>
-              <option value="UNE-EN ISO 17638 / UNE-EN ISO 23278">Soldaduras: UNE-EN ISO 17638 / UNE-EN ISO 23278</option>
-              <option value="UNE-EN 1369">Fundición: UNE-EN 1369</option>
-              <option value="UNE-EN 10228-1">Forja: UNE-EN 10228-1</option>
-              <option value="UNE-EN ISO 10893-5">Tubos: UNE-EN ISO 10893-5</option>
-              <option value="OTRA">Otra / especificar en observaciones</option>
-            </select>
-          </div>
-
-          <div class="campo">
-            <label for="metodo">MÉTODO</label>
-            <select id="metodo">
-              <option value="Método continuo">Método continuo</option>
-              <option value="Método residual">Método residual</option>
-            </select>
-          </div>
-
-          <div class="campo">
-            <label for="particulas">MEDIO DE DETECCIÓN</label>
-            <select id="particulas">
-              <option value="Partículas magnéticas fluorescentes en suspensión húmeda">Fluorescentes húmedas</option>
-              <option value="Partículas magnéticas visibles en suspensión húmeda">Visibles húmedas</option>
-              <option value="Partículas magnéticas secas visibles">Secas visibles</option>
-            </select>
-          </div>
-
-          <div class="campo">
-            <label for="resultado">RESULTADO</label>
-            <select id="resultado">
-              <option value="APTO">APTO</option>
-              <option value="NO APTO">NO APTO</option>
-              <option value="PENDIENTE DE EVALUACIÓN">PENDIENTE DE EVALUACIÓN</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid-3">
-          <div class="campo">
-            <label for="iluminacion">CONDICIONES DE OBSERVACIÓN</label>
-            <input type="text" id="iluminacion" value="Según UNE-EN ISO 3059" />
-          </div>
-
-          <div class="campo">
-            <label for="magnetizacion">MAGNETIZACIÓN</label>
-            <input type="text" id="magnetizacion" value="Dos direcciones aproximadamente perpendiculares" />
-          </div>
-
-          <div class="campo">
-            <label for="criterio">CRITERIO DE ACEPTACIÓN</label>
-            <input type="text" id="criterio" value="Según norma aplicable / pedido" />
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div class="campo">
-            <label for="observaciones">OBSERVACIONES</label>
-            <textarea id="observaciones" placeholder="Indicar observaciones, defectología, zonas inspeccionadas, reparaciones, etc."></textarea>
-          </div>
-
-          <div class="campo">
-            <label for="conclusion">CONCLUSIÓN</label>
-            <textarea id="conclusion">El ensayo por partículas magnéticas se realiza conforme a la normativa indicada. Las indicaciones observadas se valoran según el criterio de aceptación aplicable.</textarea>
-          </div>
-        </div>
-
-        <div class="acciones">
-          <button type="button" class="btn-primario" id="btnGenerarPDF">📄 Generar PDF</button>
-          <button type="button" class="btn-verde" id="btnGuardarInforme">💾 Guardar nº informe en Supabase</button>
-          <button type="button" class="btn-gris" id="btnVistaPrevia">👁 Vista previa datos</button>
-        </div>
-      </form>
+      <div class="grid-4">
+        <div class="campo"><label>Proyecto / Referencia</label><input id="proyectoReferencia"></div>
+        <div class="campo"><label>Material</label><input id="material" value="Fundido (Acero moldeado)"></div>
+        <div class="campo"><label>Piezas ensayadas</label><input id="piezasEnsayadas"></div>
+        <div class="campo"><label>Estado superficial</label><input id="estadoSuperficial" value="Mecanizado"></div>
+      </div>
     </section>
 
     <section class="tarjeta">
-      <div class="titulo-seccion">
-        <span>📷 Fotografías asociadas</span>
-        <span class="subtitulo">Se insertarán en el PDF si están disponibles</span>
+      <div class="titulo-seccion"><span>⚙️ II - Datos técnicos del ensayo</span><span class="subtitulo">Sistema, partículas, limpieza e iluminación</span></div>
+      <div class="grid-4">
+        <div class="campo"><label>Equipo / código</label><input id="equipoCodigo"></div>
+        <div class="campo"><label>Corriente magnetización</label><input id="corriente" value="Alterna"></div>
+        <div class="campo"><label>Secuencia magnetización</label><input id="secuencia" value="Continua"></div>
+        <div class="campo"><label>Direcciones magnetización</label><input id="direcciones" value="Multidireccional"></div>
       </div>
-      <div id="fotosContenedor" class="fotos-grid">
-        <p>No hay registro seleccionado.</p>
+      <div class="grid-4">
+        <div class="campo"><label>Patrón yugo</label><input id="patronYugo" value="N/A"></div>
+        <div class="campo"><label>Separación electrodos</label><input id="separacionElectrodos" value="N/A"></div>
+        <div class="campo"><label>Iluminación</label><input id="iluminacion" value="Luz Negra"></div>
+        <div class="campo"><label>Luxómetro</label><input id="luxometro" value="Apollo 3.0"></div>
+      </div>
+      <div class="grid-4">
+        <div class="campo"><label>Campo residual</label><input id="campoResidual" value="--"></div>
+        <div class="campo"><label>Indicador de campo</label><input id="indicadorCampo" value="--"></div>
+        <div class="campo"><label>Marca partículas</label><input id="marcaParticulas" value="LUMEN F-501"></div>
+        <div class="campo"><label>Tipo partículas</label><input id="tipoParticulas" value="Húmedas"></div>
+      </div>
+      <div class="grid-4">
+        <div class="campo"><label>Lote partículas</label><input id="loteParticulas" value="C-77564"></div>
+        <div class="campo"><label>Caducidad partículas</label><input id="caducidadParticulas" value="abr-27"></div>
+        <div class="campo"><label>Color partículas</label><input id="colorParticulas" value="Fluorescentes"></div>
+        <div class="campo"><label>Método aplicación</label><input id="metodoAplicacion" value="--"></div>
+      </div>
+      <div class="grid-4">
+        <div class="campo"><label>Laca contraste marca</label><input id="lacaMarca" value="--"></div>
+        <div class="campo"><label>Laca contraste tipo</label><input id="lacaTipo" value="--"></div>
+        <div class="campo"><label>Laca lote</label><input id="lacaLote" value="--"></div>
+        <div class="campo"><label>Laca caducidad</label><input id="lacaCaducidad" value="--"></div>
+      </div>
+      <div class="grid-4">
+        <div class="campo"><label>Limpieza previa</label><input id="limpiezaPrevia" value="OK"></div>
+        <div class="campo"><label>Limpieza final</label><input id="limpiezaFinal" value="OK"></div>
+        <div class="campo"><label>Producto limpieza</label><input id="productoLimpieza" value="--"></div>
+        <div class="campo"><label>Marca limpieza</label><input id="marcaLimpieza" value="--"></div>
       </div>
     </section>
 
-    <section class="tarjeta oculto" id="vistaPrevia">
-      <div class="titulo-seccion">👁 Vista previa del informe</div>
-      <div style="overflow-x:auto;">
-        <table>
-          <tbody id="tablaVistaPrevia"></tbody>
-        </table>
+    <section class="tarjeta">
+      <div class="titulo-seccion"><span>📐 III - Requerimientos</span><span class="subtitulo">Inspection / Evaluation</span></div>
+      <div class="grid-3">
+        <div class="campo"><label>Inspección</label><textarea id="inspeccion">UNE - EN ISO 9934-1 (2017)
+UNE - EN ISO 9934-2 (2016)
+UNE - EN ISO 9934-3 (2016)</textarea></div>
+        <div class="campo"><label>Evaluación</label><textarea id="evaluacion">UNE - EN 1369 (2013) / ET-022</textarea></div>
+        <div class="campo"><label>Nivel de severidad</label><input id="nivelSeveridad" value="SM1 / LM1 (MECANIZADO)"></div>
       </div>
+    </section>
+
+    <section class="tarjeta">
+      <div class="titulo-seccion"><span>✅ IV - Resultados</span><span class="subtitulo">Results</span></div>
+      <div class="grid-4">
+        <div class="campo"><label>Piezas / Parts</label><input id="resultadoPiezas"></div>
+        <div class="campo"><label>Nº indicaciones</label><input id="numeroIndicaciones" value="--"></div>
+        <div class="campo"><label>Situación X</label><input id="situacionX" value="--"></div>
+        <div class="campo"><label>Situación Y</label><input id="situacionY" value="--"></div>
+      </div>
+      <div class="grid-3">
+        <div class="campo"><label>Longitud</label><input id="longitud" value="--"></div>
+        <div class="campo"><label>Resultado</label><select id="resultado"><option>APTO</option><option>NO APTO</option><option>PENDIENTE</option></select></div>
+        <div class="campo"><label>Observaciones</label><textarea id="observaciones"></textarea></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <div class="titulo-seccion"><span>✍️ Firma</span><span class="subtitulo">Producer / Approved</span></div>
+      <div class="grid-4">
+        <div class="campo"><label>Realizado por</label><input id="realizadoPor" value="Jose Antonio Arroyo Gomez"></div>
+        <div class="campo"><label>Nivel</label><input id="nivel" value="Nivel 2 ( E-A-009141-MT-2-M-0 )"></div>
+        <div class="campo"><label>Fecha firma</label><input type="date" id="fechaFirma"></div>
+        <div class="campo"><label>Aprobado por</label><input id="aprobadoPor" value=""></div>
+      </div>
+      <div class="acciones"><button class="btn-primario" id="btnGenerarPDF" type="button">📄 Generar PDF tipo plantilla</button><button class="btn-verde" id="btnGuardarInforme" type="button">💾 Guardar informe en Supabase</button></div>
+    </section>
+
+    <section class="tarjeta">
+      <div class="titulo-seccion"><span>📷 Registro fotográfico</span><span class="subtitulo">Se insertará en el PDF si existe</span></div>
+      <div id="fotosContenedor" class="fotos-grid"><p>No hay registro seleccionado.</p></div>
     </section>
   </main>
 
-  <footer>
-    © 2026 Talleres Mecánicos PARAMIO · Generador de Informes END
-  </footer>
+  <footer>© 2026 Talleres Mecánicos PARAMIO · Generador de Informes END</footer>
 
   <script>
-    const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
+    const SUPABASE_URL = "https://uukxdsifmxesufxujzvt.supabase.co";
+    const SUPABASE_ANON_KEY = "PON_AQUI_TU_ANON_KEY";
+    const CODIGO_GUARDAR_INFORME = "2222";
 
     const { createClient } = supabase;
     const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const CODIGO_GUARDAR_INFORME = "2222";
-
-    // Reglas automáticas por cliente.
-    // Puedes añadir más clientes aquí.
     const REGLAS_CLIENTE = {
-      "talgo": {
-        norma: "UNE-EN 1369(2013) / ET-022",
-        criterio: "Evaluación según UNE-EN 1369(2013) / ET-022",
-        observacion: "Criterio de evaluación aplicado según especificación cliente TALGO ET-022."
+      talgo: {
+        evaluacion: "UNE - EN 1369 (2013) / ET-022",
+        nivel: "SM1 / LM1 (MECANIZADO)",
+        material: "Fundido (Acero moldeado)",
+        extension: "100% Mecanizado",
+        superficie: "Mecanizado"
+      }
+    };
+
+    const CONFIG_EQUIPO = {
+      bancada: {
+        equipoCodigo: "Tiede 0138065",
+        corriente: "Alterna",
+        secuencia: "Continua",
+        direcciones: "Multidireccional",
+        patronYugo: "N/A",
+        separacionElectrodos: "N/A",
+        marcaParticulas: "LUMEN F-501",
+        tipoParticulas: "Húmedas",
+        loteParticulas: "C-77564",
+        caducidadParticulas: "abr-27",
+        colorParticulas: "Fluorescentes",
+        metodoAplicacion: "--",
+        iluminacion: "Luz Negra // SN:M35B17632 (7933µW/cm²)",
+        luxometro: "Apollo 3.0"
+      },
+      yugo: {
+        equipoCodigo: "CONTOUR PROBE 33003 / Nº 27437",
+        corriente: "Alterna",
+        secuencia: "Continua",
+        direcciones: "45° / 90°",
+        patronYugo: "Patrón 4,5 Kg",
+        separacionElectrodos: "110 mm",
+        marcaParticulas: "PFINDER",
+        tipoParticulas: "Visibles",
+        loteParticulas: "--",
+        caducidadParticulas: "--",
+        colorParticulas: "Negras / visibles",
+        metodoAplicacion: "SPRAY",
+        iluminacion: "Luz blanca según UNE-EN ISO 3059",
+        luxometro: "Apollo 3.0"
       }
     };
 
@@ -568,7 +213,6 @@
     const filtroEstado = document.getElementById("filtroEstado");
     const mensaje = document.getElementById("mensaje");
     const textoMensaje = document.getElementById("textoMensaje");
-    const resumenRegistro = document.getElementById("resumenRegistro");
     const fotosContenedor = document.getElementById("fotosContenedor");
 
     document.getElementById("btnCerrarMensaje").addEventListener("click", ocultarMensaje);
@@ -576,465 +220,166 @@
     document.getElementById("btnLimpiar").addEventListener("click", limpiarFormulario);
     document.getElementById("btnGenerarPDF").addEventListener("click", generarPDF);
     document.getElementById("btnGuardarInforme").addEventListener("click", guardarInformeSupabase);
-    document.getElementById("btnVistaPrevia").addEventListener("click", mostrarVistaPrevia);
-    document.getElementById("cliente").addEventListener("input", aplicarReglasPorCliente);
-    document.getElementById("cliente").addEventListener("change", aplicarReglasPorCliente);
     selectorRegistro.addEventListener("change", seleccionarRegistro);
     filtroEstado.addEventListener("change", pintarSelector);
+    document.getElementById("cliente").addEventListener("input", aplicarReglasCliente);
 
-    document.getElementById("fechaInforme").value = new Date().toISOString().slice(0, 10);
+    const hoy = new Date().toISOString().slice(0,10);
+    document.getElementById("fechaInforme").value = hoy;
+    document.getElementById("fechaFirma").value = hoy;
 
-    async function cargarRegistros() {
-      mostrarMensaje("info", "Cargando registros desde Supabase...");
-      selectorRegistro.innerHTML = `<option value="">Cargando registros...</option>`;
-
-      const { data, error } = await supabaseClient
-        .from("informes_particulas")
-        .select("*")
-        .order("fecha", { ascending: false })
-        .order("id", { ascending: false });
-
-      if (error) {
-        mostrarMensaje("error", "ERROR: No se han podido cargar los registros. " + error.message);
-        selectorRegistro.innerHTML = `<option value="">Error cargando registros</option>`;
-        return;
-      }
-
-      registros = data || [];
+    async function cargarRegistros(){
+      mostrarMensaje("info","Cargando registros desde Supabase...");
+      const {data,error}=await supabaseClient.from("informes_particulas").select("*").order("fecha",{ascending:false}).order("id",{ascending:false});
+      if(error){mostrarMensaje("error","ERROR cargando registros: "+error.message);return;}
+      registros=data||[];
       pintarSelector();
-      mostrarMensaje("ok", "Registros cargados correctamente.");
+      mostrarMensaje("ok","Registros cargados correctamente.");
     }
 
-    function pintarSelector() {
-      const filtro = filtroEstado.value;
-      let filtrados = [...registros];
-
-      if (filtro === "pendientes") {
-        filtrados = filtrados.filter(r => !r.informe_particulas);
-      }
-
-      if (filtro === "realizados") {
-        filtrados = filtrados.filter(r => r.informe_particulas);
-      }
-
-      if (filtrados.length === 0) {
-        selectorRegistro.innerHTML = `<option value="">No hay registros para este filtro</option>`;
-        return;
-      }
-
-      selectorRegistro.innerHTML = `<option value="">Seleccionar registro...</option>` + filtrados.map(r => {
-        const estado = r.informe_particulas ? `REALIZADO ${r.informe_particulas}` : "PENDIENTE";
-        const fecha = formatearFecha(r.fecha);
-        const numero = r.informe_particulas || r.numero_auto_informe || "SIN Nº";
-        return `<option value="${r.id}">${fecha} · ${escaparHTML(r.referencia)} · ${numero} · Cant: ${r.cantidad} · ${estado}</option>`;
+    function pintarSelector(){
+      const filtro=filtroEstado.value;
+      let datos=[...registros];
+      if(filtro==="pendientes") datos=datos.filter(r=>!r.informe_particulas);
+      if(filtro==="realizados") datos=datos.filter(r=>r.informe_particulas);
+      if(!datos.length){selectorRegistro.innerHTML='<option value="">No hay registros</option>';return;}
+      selectorRegistro.innerHTML='<option value="">Seleccionar registro...</option>'+datos.map(r=>{
+        const n=r.informe_particulas||r.numero_auto_informe||"SIN Nº";
+        return `<option value="${r.id}">${formatearFecha(r.fecha)} · ${escaparHTML(r.referencia)} · ${n} · ${r.cantidad} piezas · ${r.equipo_ensayo||""}</option>`;
       }).join("");
     }
 
-    function seleccionarRegistro() {
-      const id = Number(selectorRegistro.value);
-      registroActual = registros.find(r => Number(r.id) === id) || null;
+    function seleccionarRegistro(){
+      const id=Number(selectorRegistro.value);
+      registroActual=registros.find(r=>Number(r.id)===id)||null;
+      if(!registroActual){document.getElementById("resumenRegistro").classList.add("oculto");fotosContenedor.innerHTML='<p>No hay registro seleccionado.</p>';return;}
 
-      if (!registroActual) {
-        resumenRegistro.classList.add("oculto");
-        fotosContenedor.innerHTML = `<p>No hay registro seleccionado.</p>`;
-        return;
-      }
+      document.getElementById("resFecha").textContent=formatearFecha(registroActual.fecha);
+      document.getElementById("resReferencia").textContent=registroActual.referencia||"-";
+      document.getElementById("resCantidad").textContent=registroActual.cantidad||"-";
+      document.getElementById("resEquipo").textContent=registroActual.equipo_ensayo||"-";
+      document.getElementById("resNumero").textContent=registroActual.informe_particulas||registroActual.numero_auto_informe||"-";
+      document.getElementById("resumenRegistro").classList.remove("oculto");
 
-      document.getElementById("resFecha").textContent = formatearFecha(registroActual.fecha);
-      document.getElementById("resReferencia").textContent = registroActual.referencia || "-";
-      document.getElementById("resCantidad").textContent = registroActual.cantidad || "-";
-      document.getElementById("resEquipo").textContent = registroActual.equipo_ensayo || "-";
-      document.getElementById("resEstado").innerHTML = registroActual.informe_particulas
-        ? `<span class="badge badge-realizado">REALIZADO</span>`
-        : `<span class="badge badge-pendiente">PENDIENTE</span>`;
+      document.getElementById("numeroInforme").value=registroActual.informe_particulas||registroActual.numero_auto_informe||generarNumeroSugerido();
+      document.getElementById("proyectoReferencia").value=registroActual.referencia||"";
+      document.getElementById("piezasEnsayadas").value=(registroActual.cantidad||"")+" Piezas";
+      document.getElementById("resultadoPiezas").value=registroActual.cantidad||"";
+      document.getElementById("cliente").value=registroActual.cliente||"";
+      document.getElementById("observaciones").value=registroActual.observaciones||"";
 
-      resumenRegistro.classList.remove("oculto");
-
-      document.getElementById("numeroInforme").value = registroActual.informe_particulas || registroActual.numero_auto_informe || generarNumeroSugerido();
-      document.getElementById("cliente").value = registroActual.cliente || "";
-      document.getElementById("operario").value = registroActual.operario || "";
-      document.getElementById("resultado").value = registroActual.resultado || "APTO";
-      document.getElementById("observaciones").value = registroActual.observaciones || "";
-
+      aplicarReglasEquipo();
+      aplicarReglasCliente();
       pintarFotos();
-      aplicarReglasPorCliente();
-      aplicarReglasPorEquipo();
-      mostrarVistaPrevia(false);
     }
 
-    function aplicarReglasPorCliente() {
-      const cliente = normalizarTexto(document.getElementById("cliente").value);
-      const regla = Object.keys(REGLAS_CLIENTE).find(nombre => cliente.includes(nombre));
-
-      if (!regla) return;
-
-      const config = REGLAS_CLIENTE[regla];
-      document.getElementById("norma").value = config.norma;
-      document.getElementById("criterio").value = config.criterio;
-
-      const observaciones = document.getElementById("observaciones");
-
-if (!observaciones.value.includes(config.observacion)) {
-  observaciones.value = observaciones.value
-    ? observaciones.value + "\n" + config.observacion
-    : config.observacion;
-}
+    function aplicarReglasEquipo(){
+      if(!registroActual)return;
+      const equipo=normalizar(registroActual.equipo_ensayo);
+      const cfg=equipo.includes("yugo")?CONFIG_EQUIPO.yugo:CONFIG_EQUIPO.bancada;
+      Object.keys(cfg).forEach(id=>{if(document.getElementById(id))document.getElementById(id).value=cfg[id];});
     }
 
-    function aplicarReglasPorEquipo() {
-      if (!registroActual || !registroActual.equipo_ensayo) return;
-
-      const equipo = normalizarTexto(registroActual.equipo_ensayo);
-
-      if (equipo.includes("bancada")) {
-        document.getElementById("metodo").value = "Método continuo";
-        document.getElementById("particulas").value = "Partículas magnéticas fluorescentes en suspensión húmeda";
-        document.getElementById("magnetizacion").value = "Magnetización multidireccional en bancada";
-      }
-
-      if (equipo.includes("yugo")) {
-        document.getElementById("metodo").value = "Método continuo";
-        document.getElementById("particulas").value = "Partículas magnéticas visibles en suspensión húmeda";
-        document.getElementById("magnetizacion").value = "Magnetización con yugo en dos direcciones aproximadamente perpendiculares";
+    function aplicarReglasCliente(){
+      const cliente=normalizar(document.getElementById("cliente").value);
+      if(cliente.includes("talgo")){
+        const r=REGLAS_CLIENTE.talgo;
+        document.getElementById("evaluacion").value=r.evaluacion;
+        document.getElementById("nivelSeveridad").value=r.nivel;
+        document.getElementById("material").value=r.material;
+        document.getElementById("extensionEnsayo").value=r.extension;
+        document.getElementById("estadoSuperficial").value=r.superficie;
       }
     }
 
-    function normalizarTexto(texto) {
-      return String(texto || "")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[̀-ͯ]/g, "")
-        .trim();
+    function pintarFotos(){
+      if(!registroActual||!registroActual.foto_url){fotosContenedor.innerHTML='<p>Este registro no tiene fotografía asociada.</p>';return;}
+      fotosContenedor.innerHTML=`<div class="foto-card"><img src="${escaparHTML(registroActual.foto_url)}"><a target="_blank" href="${escaparHTML(registroActual.foto_url)}">Abrir foto original</a></div>`;
     }
 
-    function pintarFotos() {
-      if (!registroActual || !registroActual.foto_url) {
-        fotosContenedor.innerHTML = `<p>Este registro no tiene fotografía asociada.</p>`;
-        return;
-      }
-
-      fotosContenedor.innerHTML = `
-        <div class="foto-card">
-          <img src="${escaparHTML(registroActual.foto_url)}" alt="Foto del ensayo" />
-          <a href="${escaparHTML(registroActual.foto_url)}" target="_blank">Abrir foto original</a>
-        </div>
-      `;
-    }
-
-    function generarNumeroSugerido() {
-      const year = new Date().getFullYear();
-      const id = registroActual?.id || 0;
-      return `PM-${year}-${String(id).padStart(4, "0")}`;
-    }
-
-    async function guardarInformeSupabase() {
-      if (!registroActual) {
-        mostrarMensaje("error", "Selecciona primero un registro.");
-        return;
-      }
-
-      const codigo = prompt("Introduce código para guardar el nº de informe:");
-      if (codigo === null) return;
-
-      if (codigo !== CODIGO_GUARDAR_INFORME) {
-        mostrarMensaje("error", "Código incorrecto. No se ha guardado el informe.");
-        return;
-      }
-
-      const payload = {
-        informe_particulas: document.getElementById("numeroInforme").value.trim(),
-        cliente: document.getElementById("cliente").value.trim(),
-        operario: document.getElementById("operario").value.trim(),
-        resultado: document.getElementById("resultado").value,
-        observaciones: document.getElementById("observaciones").value.trim(),
-        norma: document.getElementById("norma").value,
-        fecha_informe: document.getElementById("fechaInforme").value
+    async function guardarInformeSupabase(){
+      if(!registroActual){mostrarMensaje("error","Selecciona primero un registro.");return;}
+      const codigo=prompt("Introduce código para guardar el informe:");
+      if(codigo===null)return;
+      if(codigo!==CODIGO_GUARDAR_INFORME){mostrarMensaje("error","Código incorrecto.");return;}
+      const payload={
+        informe_particulas:document.getElementById("numeroInforme").value.trim(),
+        cliente:document.getElementById("cliente").value.trim(),
+        operario:document.getElementById("realizadoPor").value.trim(),
+        resultado:document.getElementById("resultado").value,
+        observaciones:document.getElementById("observaciones").value.trim(),
+        norma:document.getElementById("evaluacion").value.trim(),
+        fecha_informe:document.getElementById("fechaInforme").value
       };
-
-      const { error } = await supabaseClient
-        .from("informes_particulas")
-        .update(payload)
-        .eq("id", registroActual.id);
-
-      if (error) {
-        mostrarMensaje("error", "ERROR: No se ha podido guardar el informe. Revisa que existan las columnas nuevas. " + error.message);
-        return;
-      }
-
-      mostrarMensaje("ok", "Informe guardado correctamente en Supabase.");
+      const {error}=await supabaseClient.from("informes_particulas").update(payload).eq("id",registroActual.id);
+      if(error){mostrarMensaje("error","ERROR guardando informe: "+error.message);return;}
+      mostrarMensaje("ok","Informe guardado en Supabase.");
       await cargarRegistros();
-      selectorRegistro.value = registroActual.id;
-      seleccionarRegistro();
     }
 
-    function obtenerDatosInforme() {
-      if (!registroActual) return null;
-
+    function datos(){
       return {
-        numeroInforme: document.getElementById("numeroInforme").value.trim() || registroActual.numero_auto_informe || generarNumeroSugerido(),
-        fechaInforme: document.getElementById("fechaInforme").value,
-        cliente: document.getElementById("cliente").value.trim(),
-        operario: document.getElementById("operario").value.trim(),
-        norma: document.getElementById("norma").value,
-        metodo: document.getElementById("metodo").value,
-        particulas: document.getElementById("particulas").value,
-        resultado: document.getElementById("resultado").value,
-        iluminacion: document.getElementById("iluminacion").value.trim(),
-        magnetizacion: document.getElementById("magnetizacion").value.trim(),
-        criterio: document.getElementById("criterio").value.trim(),
-        observaciones: document.getElementById("observaciones").value.trim(),
-        conclusion: document.getElementById("conclusion").value.trim(),
-        fechaRegistro: registroActual.fecha,
-        referencia: registroActual.referencia,
-        cantidad: registroActual.cantidad,
-        equipo: registroActual.equipo_ensayo,
-        fotoUrl: registroActual.foto_url
+        informe:val("numeroInforme"), fecha:val("fechaInforme"), cliente:val("cliente"), extension:val("extensionEnsayo"), referencia:val("proyectoReferencia"), material:val("material"), piezas:val("piezasEnsayadas"), superficie:val("estadoSuperficial"),
+        equipoCodigo:val("equipoCodigo"), corriente:val("corriente"), secuencia:val("secuencia"), patronYugo:val("patronYugo"), separacion:val("separacionElectrodos"), direcciones:val("direcciones"), iluminacion:val("iluminacion"), luxometro:val("luxometro"), campoResidual:val("campoResidual"), indicadorCampo:val("indicadorCampo"),
+        marcaParticulas:val("marcaParticulas"), tipoParticulas:val("tipoParticulas"), loteParticulas:val("loteParticulas"), caducidadParticulas:val("caducidadParticulas"), colorParticulas:val("colorParticulas"), metodoAplicacion:val("metodoAplicacion"),
+        lacaMarca:val("lacaMarca"), lacaTipo:val("lacaTipo"), lacaLote:val("lacaLote"), lacaCaducidad:val("lacaCaducidad"), limpiezaPrevia:val("limpiezaPrevia"), limpiezaFinal:val("limpiezaFinal"), productoLimpieza:val("productoLimpieza"), marcaLimpieza:val("marcaLimpieza"),
+        inspeccion:val("inspeccion"), evaluacion:val("evaluacion"), nivel:val("nivelSeveridad"), resultadoPiezas:val("resultadoPiezas"), indicaciones:val("numeroIndicaciones"), x:val("situacionX"), y:val("situacionY"), longitud:val("longitud"), resultado:val("resultado"), observaciones:val("observaciones"),
+        realizado:val("realizadoPor"), nivelInspector:val("nivel"), fechaFirma:val("fechaFirma"), aprobado:val("aprobadoPor"), foto:registroActual?.foto_url||null
       };
     }
 
-    function mostrarVistaPrevia(scroll = true) {
-      const datos = obtenerDatosInforme();
-      if (!datos) {
-        mostrarMensaje("error", "Selecciona primero un registro.");
-        return;
+    async function generarPDF(){
+      if(!registroActual){mostrarMensaje("error","Selecciona primero un registro.");return;}
+      const d=datos();
+      const {jsPDF}=window.jspdf;
+      const doc=new jsPDF("p","mm","a4");
+      const W=210,H=297;
+      doc.setFont("helvetica","normal");
+      doc.setDrawColor(0); doc.setLineWidth(.4);
+      doc.rect(5,5,200,287);
+      await headerPlantilla(doc,d,W);
+
+      section(doc,"I - DATOS GENERALES / General data",5,36,200);
+      tablaGeneral(doc,d,39);
+      section(doc,"II - DATOS TECNICOS DEL ENSAYO / Test tecnique data",5,76,200);
+      tablaTecnica(doc,d,79);
+      section(doc,"III - REQUERIMIENTOS / Request",5,172,200);
+      tablaRequerimientos(doc,d,175);
+      section(doc,"IV - RESULTADOS / Results",5,204,200);
+      tablaResultados(doc,d,213);
+      section(doc,"REGISTRO FOTOGRÁFICO / Photographic record",5,245,200);
+
+      if(d.foto){
+        try{const img=await imagenUrlADataUrl(d.foto);doc.addImage(img,"JPEG",10,252,80,35,undefined,"FAST");}
+        catch(e){doc.setFontSize(7);doc.text("No se pudo insertar la fotografía automáticamente.",10,257);}
       }
 
-      document.getElementById("vistaPrevia").classList.remove("oculto");
-      document.getElementById("tablaVistaPrevia").innerHTML = `
-        ${filaPreview("Nº informe", datos.numeroInforme)}
-        ${filaPreview("Fecha informe", formatearFecha(datos.fechaInforme))}
-        ${filaPreview("Cliente", datos.cliente)}
-        ${filaPreview("Referencia", datos.referencia)}
-        ${filaPreview("Cantidad", datos.cantidad)}
-        ${filaPreview("Equipo", datos.equipo)}
-        ${filaPreview("Norma", datos.norma)}
-        ${filaPreview("Método", datos.metodo)}
-        ${filaPreview("Medio de detección", datos.particulas)}
-        ${filaPreview("Resultado", datos.resultado)}
-        ${filaPreview("Observaciones", datos.observaciones)}
-      `;
-
-      if (scroll) document.getElementById("vistaPrevia").scrollIntoView({ behavior: "smooth" });
+      tablaFirma(doc,d,270);
+      doc.save(limpiarNombreArchivo(`${d.informe}_${d.referencia}.pdf`));
+      mostrarMensaje("ok","PDF generado con formato tipo plantilla.");
     }
 
-    function filaPreview(campo, valor) {
-      return `<tr><th style="width: 260px;">${escaparHTML(campo)}</th><td>${escaparHTML(valor || "-")}</td></tr>`;
+    async function headerPlantilla(doc,d,W){
+      try{const logo=await imagenUrlADataUrl("logo-paramio.jpg");doc.addImage(logo,"JPEG",12,8,35,17);}catch(e){doc.setFont("helvetica","bold");doc.text("PARAMIO",12,17)}
+      doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text("INFORME DE ENSAYO POR PARTÍCULAS MAGNÉTICAS",105,14,{align:"center"});
+      doc.setFontSize(8);doc.text("MAGNETIC PARTICLE TESTING REPORT",105,21,{align:"center"});
+      doc.setFontSize(7);doc.text("PC-03-38",190,12,{align:"right"});doc.text("Rev: 0",190,20,{align:"right"});
+      doc.setFont("helvetica","normal");doc.setFontSize(8);doc.text("Informe Nº:",10,31);doc.text(d.informe,45,31);line(doc,36,32,78,32);doc.text("Fecha:",160,31);doc.text(formatearFecha(d.fecha),180,31);line(doc,177,32,200,32);
     }
+    function section(doc,t,x,y,w){doc.setFillColor(235,235,235);doc.rect(x,y,w,6,"FD");doc.setFont("helvetica","bold");doc.setFontSize(8);doc.text(t,x+2,y+4.2)}
+    function txt(doc,t,x,y,size=6.5,bold=false,blue=false){doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(size);doc.setTextColor(blue?0:0,blue?62:0,blue?160:0);doc.text(String(t||""),x,y);doc.setTextColor(0,0,0)}
+    function line(doc,x1,y1,x2,y2){doc.line(x1,y1,x2,y2)}
+    function field(doc,label,value,x,y,w=55){txt(doc,label,x,y,5.7,true);txt(doc,value,x+22,y,6.2,true,true);line(doc,x+20,y+1,w+x,y+1)}
+    function tablaGeneral(doc,d,y){field(doc,"CLIENTE:",d.cliente,10,y,85);field(doc,"EXTENSION DEL ENSAYO:",d.extension,112,y,88);field(doc,"PROYECTO/REFERENCIA:",d.referencia,10,y+10,85);field(doc,"MATERIAL:",d.material,112,y+10,88);field(doc,"PIEZAS ENSAYADAS:",d.piezas,10,y+20,85);field(doc,"ESTADO SUPERFICIAL:",d.superficie,112,y+20,88);}
+    function tablaTecnica(doc,d,y){txt(doc,"SISTEMA DE MAGNETIZACIÓN/Magnetic system",10,y,6,true);txt(doc,"PARTÍCULAS MAGNÉTICAS/Magnetic particles",112,y,6,true);let yy=y+7;field(doc,"Equipo/código:",d.equipoCodigo,10,yy,85);field(doc,"Marca:",d.marcaParticulas,112,yy,45);field(doc,"Tipo:",d.tipoParticulas,165,yy,35);yy+=9;field(doc,"Corriente de magnetización:",d.corriente,10,yy,85);field(doc,"Lote:",d.loteParticulas,112,yy,45);field(doc,"Fecha caducidad:",d.caducidadParticulas,165,yy,35);yy+=9;field(doc,"Secuencia de magnetización:",d.secuencia,10,yy,85);field(doc,"Color:",d.colorParticulas,112,yy,88);yy+=9;field(doc,"Patrón Yugo:",d.patronYugo,10,yy,85);field(doc,"Método de aplicación:",d.metodoAplicacion,112,yy,88);yy+=9;field(doc,"Separación de electrodos:",d.separacion,10,yy,85);txt(doc,"LACA DE CONTRASTE / Contrast lacquer",112,yy,6,true);yy+=9;field(doc,"Direcciones de magnetización:",d.direcciones,10,yy,85);field(doc,"Marca:",d.lacaMarca,112,yy,45);field(doc,"Tipo:",d.lacaTipo,165,yy,35);yy+=9;field(doc,"Iluminación:",d.iluminacion,10,yy,85);field(doc,"Lote:",d.lacaLote,112,yy,45);field(doc,"Fecha caducidad:",d.lacaCaducidad,165,yy,35);yy+=9;field(doc,"Luxómetro:",d.luxometro,10,yy,85);txt(doc,"LIMPIEZA DE LA PIEZA / Cleaning the piece",112,yy,6,true);yy+=9;field(doc,"Campo residual:",d.campoResidual,10,yy,85);field(doc,"Limpieza previa:",d.limpiezaPrevia,112,yy,30);field(doc,"Producto:",d.productoLimpieza,148,yy,23);field(doc,"Marca:",d.marcaLimpieza,176,yy,24);yy+=9;field(doc,"Indicador de campo:",d.indicadorCampo,10,yy,85);field(doc,"Limpieza final:",d.limpiezaFinal,112,yy,30);field(doc,"Lote:","--",148,yy,23);field(doc,"Tipo:","--",176,yy,24);}
+    function tablaRequerimientos(doc,d,y){txt(doc,"INSPECCIÓN / Inspection:",10,y,6,true);txt(doc,d.inspeccion,45,y,6,true,true);txt(doc,"EVALUACIÓN / Evaluation:",115,y,6,true);txt(doc,d.evaluacion,155,y,6,true,true);txt(doc,"Nivel de severidad:",115,y+14,6);txt(doc,d.nivel,155,y+14,6,true,true)}
+    function tablaResultados(doc,d,y){txt(doc,"(Las piezas con resultado rechazada, se adjunta croquis o fotografía en anexo hoja 2)",65,y-3,5.5);doc.autoTable({startY:y,theme:"grid",margin:{left:5,right:5},styles:{fontSize:6,cellPadding:1.3,lineColor:[0,0,0],lineWidth:.2,halign:"center"},head:[["PIEZAS/Parts","Nº INDICACIONES\nNº indications","SITUACIÓN / Situation\nX","Y","LONGITUD / Length","RESULTADO / Result"]],body:[[d.resultadoPiezas,d.indicaciones,d.x,d.y,d.longitud,d.resultado],["","","","","",""]],tableWidth:200,headStyles:{fillColor:[255,255,255],textColor:[0,0,0],fontStyle:"bold"}})}
+    function tablaFirma(doc,d,y){doc.autoTable({startY:y,theme:"grid",margin:{left:5,right:5},styles:{fontSize:6,cellPadding:1.5,lineColor:[0,0,0],lineWidth:.2,halign:"center"},body:[["","REALIZADO / Producer","APROBADO / Approved"],["NOMBRE/Name:",d.realizado,d.aprobado||""],["NIVEL/Level:",d.nivelInspector,""],["FIRMA/Signe:","",""],["FECHA/Date:",formatearFecha(d.fechaFirma),""]],columnStyles:{0:{cellWidth:50,fontStyle:"bold"},1:{cellWidth:90},2:{cellWidth:60}}})}
 
-    async function generarPDF() {
-      const datos = obtenerDatosInforme();
-
-      if (!datos) {
-        mostrarMensaje("error", "Selecciona primero un registro.");
-        return;
-      }
-
-      if (!datos.numeroInforme) {
-        mostrarMensaje("error", "Indica el nº de informe antes de generar el PDF.");
-        return;
-      }
-
-      mostrarMensaje("info", "Generando PDF...");
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF("p", "mm", "a4");
-      const ancho = doc.internal.pageSize.getWidth();
-      const alto = doc.internal.pageSize.getHeight();
-
-      await cabeceraPDF(doc, ancho);
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(15);
-      doc.text("INFORME DE ENSAYO POR PARTÍCULAS MAGNÉTICAS", ancho / 2, 43, { align: "center" });
-
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.text(`Nº Informe: ${datos.numeroInforme}`, 14, 55);
-      doc.text(`Fecha informe: ${formatearFecha(datos.fechaInforme)}`, 140, 55);
-
-      doc.autoTable({
-        startY: 64,
-        theme: "grid",
-        styles: { fontSize: 9, cellPadding: 2.8 },
-        headStyles: { fillColor: [8, 43, 85], textColor: 255 },
-        head: [["Campo", "Dato", "Campo", "Dato"]],
-        body: [
-          ["Cliente", datos.cliente || "-", "Operario / Inspector", datos.operario || "-"],
-          ["Referencia", datos.referencia || "-", "Cantidad", String(datos.cantidad || "-")],
-          ["Fecha registro", formatearFecha(datos.fechaRegistro), "Equipo ensayo", datos.equipo || "-"],
-          ["Resultado", datos.resultado, "Criterio", datos.criterio || "-"]
-        ],
-        columnStyles: {
-          0: { fontStyle: "bold", fillColor: [245, 247, 251], cellWidth: 36 },
-          1: { cellWidth: 58 },
-          2: { fontStyle: "bold", fillColor: [245, 247, 251], cellWidth: 40 },
-          3: { cellWidth: 48 }
-        }
-      });
-
-      doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 8,
-        theme: "grid",
-        styles: { fontSize: 9, cellPadding: 2.8 },
-        headStyles: { fillColor: [0, 216, 216], textColor: [0, 31, 51] },
-        head: [["Parámetro de ensayo", "Valor"]],
-        body: [
-          ["Norma / procedimiento", datos.norma],
-          ["Método", datos.metodo],
-          ["Medio de detección", datos.particulas],
-          ["Condiciones de observación", datos.iluminacion],
-          ["Magnetización", datos.magnetizacion],
-          ["Criterio de aceptación", datos.criterio]
-        ],
-        columnStyles: {
-          0: { fontStyle: "bold", fillColor: [245, 247, 251], cellWidth: 58 },
-          1: { cellWidth: 124 }
-        }
-      });
-
-      doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 8,
-        theme: "grid",
-        styles: { fontSize: 9, cellPadding: 3, valign: "top" },
-        headStyles: { fillColor: [8, 43, 85], textColor: 255 },
-        head: [["Observaciones", "Conclusión"]],
-        body: [[datos.observaciones || "Sin observaciones.", datos.conclusion || "-"]],
-        columnStyles: { 0: { cellWidth: 91 }, 1: { cellWidth: 91 } }
-      });
-
-      let y = doc.lastAutoTable.finalY + 12;
-
-      if (datos.fotoUrl) {
-        if (y > 205) {
-          piePDF(doc, ancho, alto);
-          doc.addPage();
-          await cabeceraPDF(doc, ancho);
-          y = 45;
-        }
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
-        doc.text("Evidencia fotográfica", 14, y);
-        y += 6;
-
-        try {
-          const imagen = await imagenUrlADataUrl(datos.fotoUrl);
-          doc.addImage(imagen, "JPEG", 14, y, 95, 70, undefined, "FAST");
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(8);
-          doc.text("Fotografía asociada al registro del ensayo.", 14, y + 76);
-        } catch (error) {
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(9);
-          doc.text("No se pudo insertar la imagen automáticamente. Enlace:", 14, y);
-          doc.setTextColor(11, 99, 206);
-          doc.textWithLink("Abrir fotografía", 14, y + 6, { url: datos.fotoUrl });
-          doc.setTextColor(0, 0, 0);
-        }
-      }
-
-      const firmaY = 255;
-      doc.setDrawColor(120, 120, 120);
-      doc.line(25, firmaY, 85, firmaY);
-      doc.line(125, firmaY, 185, firmaY);
-      doc.setFontSize(9);
-      doc.text("Inspector / Operario", 55, firmaY + 6, { align: "center" });
-      doc.text("Responsable / Cliente", 155, firmaY + 6, { align: "center" });
-
-      piePDF(doc, ancho, alto);
-
-      const nombreArchivo = limpiarNombreArchivo(`${datos.numeroInforme}_${datos.referencia}.pdf`);
-      doc.save(nombreArchivo);
-      mostrarMensaje("ok", "PDF generado correctamente.");
-    }
-
-    async function cabeceraPDF(doc, ancho) {
-      doc.setFillColor(8, 43, 85);
-      doc.rect(0, 0, ancho, 30, "F");
-      doc.setFillColor(255, 121, 0);
-      doc.rect(0, 30, ancho, 3, "F");
-
-      try {
-        const logo = await imagenUrlADataUrl("logo-paramio.jpg");
-        doc.addImage(logo, "JPEG", 12, 6, 45, 18, undefined, "FAST");
-      } catch (e) {
-        doc.setTextColor(255, 255, 255);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("PARAMIO", 14, 18);
-      }
-
-      doc.setTextColor(255, 255, 255);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
-      doc.text("ENSAYOS NO DESTRUCTIVOS", ancho - 14, 13, { align: "right" });
-      doc.setFont("helvetica", "normal");
-      doc.text("Partículas Magnéticas", ancho - 14, 20, { align: "right" });
-      doc.setTextColor(0, 0, 0);
-    }
-
-    function piePDF(doc, ancho, alto) {
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(100, 100, 100);
-      doc.text("Documento generado automáticamente desde el sistema de registro de partículas magnéticas.", 14, alto - 10);
-      doc.text(`Página ${doc.internal.getNumberOfPages()}`, ancho - 14, alto - 10, { align: "right" });
-      doc.setTextColor(0, 0, 0);
-    }
-
-    async function imagenUrlADataUrl(url) {
-      const response = await fetch(url);
-      const blob = await response.blob();
-
-      return await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    }
-
-    function limpiarFormulario() {
-      document.getElementById("formInforme").reset();
-      document.getElementById("fechaInforme").value = new Date().toISOString().slice(0, 10);
-      document.getElementById("conclusion").value = "El ensayo por partículas magnéticas se realiza conforme a la normativa indicada. Las indicaciones observadas se valoran según el criterio de aceptación aplicable.";
-      document.getElementById("iluminacion").value = "Según UNE-EN ISO 3059";
-      document.getElementById("magnetizacion").value = "Dos direcciones aproximadamente perpendiculares";
-      document.getElementById("criterio").value = "Según norma aplicable / pedido";
-      document.getElementById("vistaPrevia").classList.add("oculto");
-    }
-
-    function mostrarMensaje(tipo, texto) {
-      mensaje.className = "mensaje " + tipo;
-      textoMensaje.textContent = texto;
-    }
-
-    function ocultarMensaje() {
-      mensaje.className = "mensaje";
-      textoMensaje.textContent = "";
-    }
-
-    function formatearFecha(fechaISO) {
-      if (!fechaISO) return "";
-      const partes = fechaISO.split("-");
-      if (partes.length !== 3) return fechaISO;
-      return `${partes[2]}/${partes[1]}/${partes[0]}`;
-    }
-
-    function escaparHTML(texto) {
-      if (texto === null || texto === undefined) return "";
-      return String(texto)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function limpiarNombreArchivo(nombre) {
-      return nombre.replace(/[\\/:*?"<>|]/g, "-").replaceAll(" ", "_");
-    }
-
+    async function imagenUrlADataUrl(url){const r=await fetch(url);const b=await r.blob();return await new Promise((res,rej)=>{const reader=new FileReader();reader.onloadend=()=>res(reader.result);reader.onerror=rej;reader.readAsDataURL(b)})}
+    function limpiarFormulario(){document.querySelectorAll("input, textarea").forEach(el=>{if(!["fechaInforme","fechaFirma"].includes(el.id))el.value=""});document.getElementById("fechaInforme").value=hoy;document.getElementById("fechaFirma").value=hoy}
+    function val(id){return document.getElementById(id)?.value||""} function normalizar(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim()} function formatearFecha(f){if(!f)return"";const p=String(f).split("-");return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:f} function escaparHTML(t){return String(t??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")} function limpiarNombreArchivo(n){return n.replace(/[\\/:*?"<>|]/g,"-").replaceAll(" ","_")} function generarNumeroSugerido(){const year=new Date().getFullYear();return `PM-${year}-${String(registroActual?.id||0).padStart(4,"0")}`}
+    function mostrarMensaje(tipo,texto){mensaje.className="mensaje "+tipo;textoMensaje.textContent=texto} function ocultarMensaje(){mensaje.className="mensaje";textoMensaje.textContent=""}
     cargarRegistros();
   </script>
 </body>
