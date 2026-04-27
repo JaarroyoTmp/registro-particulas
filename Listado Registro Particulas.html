@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Listado de Registros - Partículas Magnéticas</title>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --azul: #082b55;
+      --azul2: #0b63ce;
+      --naranja: #ff7900;
+      --cyan: #00d8d8;
+      --fondo: #f5f7fb;
+      --borde: #d8dde8;
+      --texto: #1f2937;
+      --verde: #169c45;
+      --rojo: #dc2626;
+      --gris: #64748b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+    }
+
+    .cabecera {
+      background: var(--azul);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: 18px 32px;
+      border-bottom: 4px solid var(--naranja);
+    }
+
+    .cabecera img {
+      width: 220px;
+      max-height: 85px;
+      object-fit: contain;
+    }
+
+    .separador {
+      width: 1px;
+      height: 65px;
+      background: rgba(255,255,255,.35);
+    }
+
+    .titulo h1 {
+      margin: 0 0 8px 0;
+      font-size: 30px;
+      color: #fff;
+    }
+
+    .titulo p {
+      margin: 0;
+      font-size: 16px;
+      color: #dbeafe;
+    }
+
+    main { padding: 28px; }
+
+    .tarjeta {
+      background: #fff;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(15,23,42,.08);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .titulo-seccion {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--azul2);
+      font-size: 18px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .subtitulo {
+      color: var(--gris);
+      font-size: 13px;
+      text-transform: none;
+    }
+
+    .filtros {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto auto;
+      gap: 14px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      font-size: 12px;
+      margin-bottom: 7px;
+      color: #2f3542;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      font-size: 14px;
+      background: #fff;
+      font-family: inherit;
+    }
+
+    button {
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 800;
+      padding: 11px 16px;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .btn-primario { background: var(--azul2); color: #fff; }
+    .btn-secundario { background: var(--naranja); color: #fff; }
+    .btn-gris { background: #e2e8f0; color: #111827; }
+    .btn-verde { background: var(--verde); color: #fff; }
+
+    .mensaje {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-weight: 800;
+      margin-bottom: 22px;
+    }
+
+    .mensaje.ok { display: flex; color: #08752e; background: #e9fbee; border: 1px solid #9ee7b1; }
+    .mensaje.error { display: flex; color: #991b1b; background: #fee2e2; border: 1px solid #fca5a5; }
+    .mensaje.info { display: flex; color: #1e40af; background: #dbeafe; border: 1px solid #93c5fd; }
+
+    .cerrar-mensaje {
+      background: transparent;
+      color: inherit;
+      font-size: 22px;
+      padding: 0;
+    }
+
+    .resumen {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .dato {
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      padding: 14px;
+      background: #fafafa;
+    }
+
+    .dato span {
+      display: block;
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--gris);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    .dato strong {
+      font-size: 22px;
+      color: var(--azul);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      min-width: 1100px;
+    }
+
+    th {
+      background: var(--cyan);
+      color: #001f33;
+      font-weight: 900;
+      font-size: 13px;
+      text-align: left;
+      padding: 11px;
+      border: 1px solid #d4dbe8;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 10px;
+      border: 1px solid #d4dbe8;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    tr:nth-child(even) td { background: #fafafa; }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 900;
+      font-size: 11px;
+    }
+
+    .pendiente { background: var(--naranja); }
+    .realizado { background: var(--verde); }
+    .enviado { background: #2563eb; }
+    .anulado { background: var(--rojo); }
+
+    .numero {
+      font-weight: 900;
+      color: var(--azul);
+    }
+
+    .acciones-tabla {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    a.boton {
+      display: inline-block;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: 800;
+      padding: 8px 11px;
+      font-size: 12px;
+    }
+
+    .boton-azul { background: var(--azul2); color: #fff; }
+    .boton-gris { background: #e2e8f0; color: #111827; }
+
+    footer {
+      text-align: center;
+      color: #7a7f89;
+      font-size: 13px;
+      padding: 10px 30px 28px;
+    }
+
+    @media(max-width:1000px) {
+      .filtros { grid-template-columns: 1fr; }
+      .resumen { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media(max-width:700px) {
+      main { padding: 16px; }
+      .cabecera { flex-direction: column; align-items: flex-start; }
+      .separador { display: none; }
+      .cabecera img { width: 210px; }
+      .titulo h1 { font-size: 23px; }
+      .resumen { grid-template-columns: 1fr; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="cabecera">
+    <img src="logo-paramio.jpg" alt="Talleres Mecánicos Paramio" />
+    <div class="separador"></div>
+    <div class="titulo">
+      <h1>Listado de Registros de Partículas Magnéticas</h1>
+      <p>Control de informes pendientes, realizados y trazabilidad</p>
+    </div>
+  </header>
+
+  <main>
+    <div id="mensaje" class="mensaje">
+      <span id="textoMensaje"></span>
+      <button class="cerrar-mensaje" id="btnCerrarMensaje">×</button>
+    </div>
+
+    <section class="tarjeta">
+      <div class="titulo-seccion">
+        <span>🔎 Filtros</span>
+        <span class="subtitulo">Datos leídos desde Supabase</span>
+      </div>
+
+      <div class="filtros">
+        <div>
+          <label>Estado informe</label>
+          <select id="filtroEstado">
+            <option value="todos">Todos</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="realizado">Realizados</option>
+            <option value="enviado">Enviados</option>
+            <option value="anulado">Anulados</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Buscar referencia / cliente / nº informe</label>
+          <input id="busqueda" placeholder="Ej: 5B02A, Talgo, 2026-095..." />
+        </div>
+
+        <div>
+          <label>Orden</label>
+          <select id="orden">
+            <option value="fecha_desc">Fecha registro ↓</option>
+            <option value="fecha_asc">Fecha registro ↑</option>
+            <option value="numero_desc">Nº informe ↓</option>
+            <option value="numero_asc">Nº informe ↑</option>
+          </select>
+        </div>
+
+        <button class="btn-primario" id="btnRecargar" type="button">🔄 Recargar</button>
+        <button class="btn-secundario" id="btnVolver" type="button">↩ Volver al informe</button>
+      </div>
+
+      <div class="resumen">
+        <div class="dato"><span>Total registros</span><strong id="totalRegistros">0</strong></div>
+        <div class="dato"><span>Pendientes</span><strong id="totalPendientes">0</strong></div>
+        <div class="dato"><span>Realizados</span><strong id="totalRealizados">0</strong></div>
+        <div class="dato"><span>Enviados</span><strong id="totalEnviados">0</strong></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <div class="titulo-seccion">
+        <span>📋 Registros</span>
+        <span class="subtitulo" id="contadorVista">0 registros visibles</span>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha registro</th>
+              <th>Referencia</th>
+              <th>Cantidad</th>
+              <th>Equipo</th>
+              <th>Cliente</th>
+              <th>Nº informe</th>
+              <th>Estado</th>
+              <th>Fecha finalizado</th>
+              <th>PDF</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyListado">
+            <tr><td colspan="10">Cargando registros...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>© 2026 Talleres Mecánicos PARAMIO · Control de Ensayos No Destructivos</footer>
+
+  <script>
+    const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
+
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let registros = [];
+
+    const filtroEstado = document.getElementById("filtroEstado");
+    const busqueda = document.getElementById("busqueda");
+    const orden = document.getElementById("orden");
+    const tbodyListado = document.getElementById("tbodyListado");
+    const mensaje = document.getElementById("mensaje");
+    const textoMensaje = document.getElementById("textoMensaje");
+
+    document.getElementById("btnCerrarMensaje").addEventListener("click", ocultarMensaje);
+    document.getElementById("btnRecargar").addEventListener("click", cargarRegistros);
+    document.getElementById("btnVolver").addEventListener("click", () => window.location.href = "informe.html");
+    filtroEstado.addEventListener("change", pintarListado);
+    busqueda.addEventListener("input", pintarListado);
+    orden.addEventListener("change", pintarListado);
+
+    async function cargarRegistros() {
+      mostrarMensaje("info", "Cargando registros desde Supabase...");
+
+      const { data, error } = await supabaseClient
+        .from("informes_particulas")
+        .select("*")
+        .order("fecha", { ascending: false })
+        .order("id", { ascending: false });
+
+      if (error) {
+        mostrarMensaje("error", "ERROR cargando registros: " + error.message);
+        tbodyListado.innerHTML = '<tr><td colspan="10">Error cargando registros.</td></tr>';
+        return;
+      }
+
+      registros = data || [];
+      pintarResumen();
+      pintarListado();
+      mostrarMensaje("ok", "Registros cargados correctamente.");
+    }
+
+    function pintarResumen() {
+      const pendientes = registros.filter(r => !esRealizado(r)).length;
+      const realizados = registros.filter(r => esRealizado(r)).length;
+      const enviados = registros.filter(r => (r.estado_informe || "") === "enviado").length;
+
+      document.getElementById("totalRegistros").textContent = registros.length;
+      document.getElementById("totalPendientes").textContent = pendientes;
+      document.getElementById("totalRealizados").textContent = realizados;
+      document.getElementById("totalEnviados").textContent = enviados;
+    }
+
+    function pintarListado() {
+      let datos = [...registros];
+      const estado = filtroEstado.value;
+      const q = normalizar(busqueda.value);
+
+      if (estado !== "todos") {
+        datos = datos.filter(r => estadoCalculado(r) === estado);
+      }
+
+      if (q) {
+        datos = datos.filter(r => {
+          const texto = normalizar([
+            r.referencia,
+            r.cliente,
+            r.numero_informe_final,
+            r.informe_particulas,
+            r.equipo_ensayo,
+            r.estado_informe
+          ].join(" "));
+          return texto.includes(q);
+        });
+      }
+
+      datos = ordenarDatos(datos);
+      document.getElementById("contadorVista").textContent = `${datos.length} registros visibles`;
+
+      if (!datos.length) {
+        tbodyListado.innerHTML = '<tr><td colspan="10">No hay registros con los filtros seleccionados.</td></tr>';
+        return;
+      }
+
+      tbodyListado.innerHTML = datos.map(r => {
+        const estado = estadoCalculado(r);
+        const numero = r.numero_informe_final || r.informe_particulas || "-";
+        const pdf = r.pdf_url
+          ? `<a class="boton boton-azul" href="${escaparHTML(r.pdf_url)}" target="_blank">Abrir PDF</a>`
+          : "-";
+
+        const abrirUrl = `informe.html?id=${encodeURIComponent(r.id)}`;
+
+        return `
+          <tr>
+            <td>${formatearFecha(r.fecha)}</td>
+            <td><strong>${escaparHTML(r.referencia || "-")}</strong></td>
+            <td>${escaparHTML(r.cantidad || "-")}</td>
+            <td>${escaparHTML(r.equipo_ensayo || "-")}</td>
+            <td>${escaparHTML(r.cliente || "-")}</td>
+            <td class="numero">${escaparHTML(numero)}</td>
+            <td><span class="badge ${estado}">${estado.toUpperCase()}</span></td>
+            <td>${formatearFechaHora(r.informe_finalizado_at)}</td>
+            <td>${pdf}</td>
+            <td>
+              <div class="acciones-tabla">
+                <a class="boton boton-gris" href="${abrirUrl}">Abrir</a>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function ordenarDatos(datos) {
+      const tipo = orden.value;
+      return datos.sort((a, b) => {
+        if (tipo === "fecha_asc") return String(a.fecha || "").localeCompare(String(b.fecha || ""));
+        if (tipo === "fecha_desc") return String(b.fecha || "").localeCompare(String(a.fecha || ""));
+        if (tipo === "numero_asc") return String(a.numero_informe_final || a.informe_particulas || "").localeCompare(String(b.numero_informe_final || b.informe_particulas || ""));
+        if (tipo === "numero_desc") return String(b.numero_informe_final || b.informe_particulas || "").localeCompare(String(a.numero_informe_final || a.informe_particulas || ""));
+        return 0;
+      });
+    }
+
+    function estadoCalculado(r) {
+      if ((r.estado_informe || "") === "enviado") return "enviado";
+      if ((r.estado_informe || "") === "anulado") return "anulado";
+      if ((r.estado_informe || "") === "realizado" || r.numero_informe_final) return "realizado";
+      return "pendiente";
+    }
+
+    function esRealizado(r) {
+      return estadoCalculado(r) === "realizado" || estadoCalculado(r) === "enviado";
+    }
+
+    function formatearFecha(f) {
+      if (!f) return "-";
+      const p = String(f).split("-");
+      return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : f;
+    }
+
+    function formatearFechaHora(f) {
+      if (!f) return "-";
+      const d = new Date(f);
+      if (isNaN(d.getTime())) return f;
+      return d.toLocaleDateString("es-ES") + " " + d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function normalizar(t) {
+      return String(t || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+    }
+
+    function escaparHTML(t) {
+      return String(t ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function mostrarMensaje(tipo, texto) {
+      mensaje.className = "mensaje " + tipo;
+      textoMensaje.textContent = texto;
+    }
+
+    function ocultarMensaje() {
+      mensaje.className = "mensaje";
+      textoMensaje.textContent = "";
+    }
+
+    cargarRegistros();
+  </script>
+</body>
+</html>
