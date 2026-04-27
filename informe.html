@@ -984,8 +984,9 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       if (firmaCargada && celdaFirma) {
         doc.setPage(celdaFirma.page);
 
-        const anchoFirma = 46;
-        const altoFirma = 14;
+        // Ajuste tamaño firma (más grande y sin deformar)
+        const anchoFirma = celdaFirma.w * 0.8;
+        const altoFirma = celdaFirma.h * 0.7;
         const firmaX = celdaFirma.x + (celdaFirma.w - anchoFirma) / 2;
         const firmaY = celdaFirma.y + (celdaFirma.h - altoFirma) / 2;
 
