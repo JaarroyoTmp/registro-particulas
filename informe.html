@@ -515,8 +515,8 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
     function pintarSelector() {
       const filtro = filtroEstado.value;
       let datos = [...registros];
-      if (filtro === "pendientes") datos = datos.filter(r => !r.informe_particulas);
-      if (filtro === "realizados") datos = datos.filter(r => r.informe_particulas);
+      if (filtro === "pendientes") datos = datos.filter(r => (r.estado_informe || "pendiente") !== "realizado" && !r.numero_informe_final);
+      if (filtro === "realizados") datos = datos.filter(r => (r.estado_informe || "") === "realizado" || r.numero_informe_final);
 
       if (!datos.length) {
         selectorRegistro.innerHTML = '<option value="">No hay registros</option>';
@@ -524,8 +524,9 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       }
 
       selectorRegistro.innerHTML = '<option value="">Seleccionar registro...</option>' + datos.map(r => {
-        const n = r.informe_particulas || r.numero_auto_informe || "SIN Nº";
-        return `<option value="${r.id}">${formatearFecha(r.fecha)} · ${escaparHTML(r.referencia)} · ${n} · ${r.cantidad} piezas · ${r.equipo_ensayo || ""}</option>`;
+        const n = r.numero_informe_final || r.informe_particulas || "SIN Nº FINAL";
+        const estado = r.estado_informe || (r.numero_informe_final ? "realizado" : "pendiente");
+        return `<option value="${r.id}">${formatearFecha(r.fecha)} · ${escaparHTML(r.referencia)} · ${n} · ${estado.toUpperCase()} · ${r.cantidad} piezas · ${r.equipo_ensayo || ""}</option>`;
       }).join("");
     }
 
@@ -543,10 +544,10 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
       document.getElementById("resReferencia").textContent = registroActual.referencia || "-";
       document.getElementById("resCantidad").textContent = registroActual.cantidad || "-";
       document.getElementById("resEquipo").textContent = registroActual.equipo_ensayo || "-";
-      document.getElementById("resNumero").textContent = registroActual.informe_particulas || registroActual.numero_auto_informe || "-";
+      document.getElementById("resNumero").textContent = registroActual.numero_informe_final || registroActual.informe_particulas || "PENDIENTE";
       document.getElementById("resumenRegistro").classList.remove("oculto");
 
-      document.getElementById("numeroInforme").value = registroActual.informe_particulas || registroActual.numero_auto_informe || generarNumeroSugerido();
+      document.getElementById("numeroInforme").value = registroActual.numero_informe_final || registroActual.informe_particulas || "SE ASIGNARÁ AL FINALIZAR";
       document.getElementById("proyectoReferencia").value = registroActual.referencia || "";
       document.getElementById("piezasEnsayadas").value = (registroActual.cantidad || "") + " Piezas";
       document.getElementById("resultadoPiezas").value = registroActual.cantidad || "";
@@ -595,15 +596,21 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         return;
       }
 
-      const codigo = prompt("Introduce código para guardar el informe:");
+      const codigo = prompt("Introduce código para finalizar y guardar el informe:");
       if (codigo === null) return;
       if (codigo !== CODIGO_GUARDAR_INFORME) {
         mostrarMensaje("error", "Código incorrecto.");
         return;
       }
 
+      const numeroFinal = await asegurarNumeroFinal();
+      if (!numeroFinal) return;
+
       const payload = {
-        informe_particulas: document.getElementById("numeroInforme").value.trim(),
+        informe_particulas: numeroFinal,
+        numero_informe_final: numeroFinal,
+        estado_informe: "realizado",
+        informe_finalizado_at: new Date().toISOString(),
         cliente: document.getElementById("cliente").value.trim(),
         operario: document.getElementById("realizadoPor").value.trim(),
         resultado: document.getElementById("resultado").value,
@@ -622,8 +629,41 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         return;
       }
 
-      mostrarMensaje("ok", "Informe guardado en Supabase.");
+      registroActual.numero_informe_final = numeroFinal;
+      registroActual.informe_particulas = numeroFinal;
+      registroActual.estado_informe = "realizado";
+      document.getElementById("numeroInforme").value = numeroFinal;
+      document.getElementById("resNumero").textContent = numeroFinal;
+
+      mostrarMensaje("ok", "Informe finalizado y guardado con Nº " + numeroFinal + ".");
       await cargarRegistros();
+    }
+
+    async function asegurarNumeroFinal() {
+      if (!registroActual) {
+        mostrarMensaje("error", "Selecciona primero un registro.");
+        return null;
+      }
+
+      if (registroActual.numero_informe_final) {
+        document.getElementById("numeroInforme").value = registroActual.numero_informe_final;
+        return registroActual.numero_informe_final;
+      }
+
+      mostrarMensaje("info", "Asignando número final de informe...");
+
+      const { data, error } = await supabaseClient.rpc("generar_numero_informe_particulas");
+
+      if (error) {
+        mostrarMensaje("error", "ERROR asignando número de informe: " + error.message);
+        return null;
+      }
+
+      const numeroFinal = data;
+      document.getElementById("numeroInforme").value = numeroFinal;
+      registroActual.numero_informe_final = numeroFinal;
+
+      return numeroFinal;
     }
 
     function datos() {
@@ -683,6 +723,21 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         mostrarMensaje("error", "Selecciona primero un registro.");
         return;
       }
+
+      const numeroFinal = await asegurarNumeroFinal();
+      if (!numeroFinal) return;
+
+      // Guardamos el número final en la ficha antes de generar el PDF para evitar duplicados.
+      await supabaseClient
+        .from("informes_particulas")
+        .update({
+          numero_informe_final: numeroFinal,
+          informe_particulas: numeroFinal,
+          estado_informe: "realizado",
+          informe_finalizado_at: new Date().toISOString(),
+          fecha_informe: document.getElementById("fechaInforme").value
+        })
+        .eq("id", registroActual.id);
 
       const d = datos();
       const { jsPDF } = window.jspdf;
