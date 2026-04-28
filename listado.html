@@ -236,13 +236,15 @@
       flex-wrap: wrap;
     }
 
-    a.boton {
+    a.boton, button.boton {
       display: inline-block;
       text-decoration: none;
       border-radius: 5px;
       font-weight: 800;
       padding: 8px 11px;
       font-size: 12px;
+      width: auto;
+      white-space: nowrap;
     }
 
     .boton-azul { background: var(--azul2); color: #fff; }
@@ -369,6 +371,23 @@
     const SUPABASE_URL = "https://uukxdslfmxesufuxjzvt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3hkc2xmbXhlc3VmdXhqenZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjg5MjksImV4cCI6MjA3NjcwNDkyOX0.7bmDUEQTfl6Y5jdzORyFZUFtOs7GM0dNdfp1zsURkWw";
 
+    const PIN_DESCARGA_PDF = "2222";
+
+    function pedirPinPDF() {
+      const pin = prompt("Introduce PIN para abrir/descargar el PDF:");
+      if (pin !== PIN_DESCARGA_PDF) {
+        alert("PIN incorrecto. No se abrirá el PDF.");
+        return false;
+      }
+      return true;
+    }
+
+    function abrirPdfProtegido(url) {
+      if (!url) return;
+      if (!pedirPinPDF()) return;
+      window.open(url, "_blank");
+    }
+
     const { createClient } = supabase;
     const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -456,7 +475,7 @@
         const estado = estadoCalculado(r);
         const numero = r.numero_informe_final || r.numero_auto_informe || r.informe_particulas || "-";
         const pdf = r.pdf_url
-          ? `<a class="boton boton-azul" href="${escaparHTML(r.pdf_url)}" target="_blank">Abrir PDF</a>`
+          ? `<button type="button" class="boton boton-azul" onclick="abrirPdfProtegido('${escaparAtributoJS(r.pdf_url)}')">Abrir PDF</button>`
           : "-";
 
         const abrirUrl = `informe.html?id=${encodeURIComponent(r.id)}`;
@@ -532,6 +551,15 @@
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+    }
+
+    function escaparAtributoJS(t) {
+      return String(t ?? "")
+        .replaceAll("\\", "\\\\")
+        .replaceAll("'", "\\'")
+        .replaceAll('"', "&quot;")
+        .replaceAll("\n", "")
+        .replaceAll("\r", "");
     }
 
     function mostrarMensaje(tipo, texto) {
