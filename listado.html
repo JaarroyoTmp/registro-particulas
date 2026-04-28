@@ -435,6 +435,7 @@
             r.referencia,
             r.cliente,
             r.numero_informe_final,
+            r.numero_auto_informe,
             r.informe_particulas,
             r.equipo_ensayo,
             r.estado_informe
@@ -453,7 +454,7 @@
 
       tbodyListado.innerHTML = datos.map(r => {
         const estado = estadoCalculado(r);
-        const numero = r.numero_informe_final || r.informe_particulas || "-";
+        const numero = r.numero_informe_final || r.numero_auto_informe || r.informe_particulas || "-";
         const pdf = r.pdf_url
           ? `<a class="boton boton-azul" href="${escaparHTML(r.pdf_url)}" target="_blank">Abrir PDF</a>`
           : "-";
@@ -495,7 +496,7 @@
     function estadoCalculado(r) {
       if ((r.estado_informe || "") === "enviado") return "enviado";
       if ((r.estado_informe || "") === "anulado") return "anulado";
-      if ((r.estado_informe || "") === "realizado" || r.numero_informe_final) return "realizado";
+      if ((r.estado_informe || "") === "realizado" || r.numero_informe_final || r.numero_auto_informe) return "realizado";
       return "pendiente";
     }
 
