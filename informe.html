@@ -626,10 +626,46 @@ UNE - EN ISO 9934-3 (2016)</textarea></div>
         fecha_informe: document.getElementById("fechaInforme").value
       };
 
-      const { error } = await supabaseClient
-        .from("informes_particulas")
-        .update(payload)
-        .eq("id", registroActual.id);
+      console.log("GUARDANDO EN ID:", registroActual.id);
+console.log("PAYLOAD:", payload);
+
+const { data: actualizado, error } = await supabaseClient
+  .from("informes_particulas")
+  .update(payload)
+  .eq("id", registroActual.id)
+  .select("id, referencia, informe_particulas, numero_auto_informe, numero_informe_final, estado_informe, cliente, operario, resultado, norma, fecha_informe, informe_finalizado_at");
+
+if (error) {
+  mostrarMensaje(
+    "error",
+    "ERROR guardando informe: " + error.message + ". ATENCIÓN: revisa el registro antes de volver a intentarlo."
+  );
+
+  alert(
+    "ERROR guardando informe: " + error.message +
+    "\n\nRevisa Supabase antes de volver a guardar."
+  );
+
+  return;
+}
+
+if (!actualizado || actualizado.length === 0) {
+  mostrarMensaje(
+    "error",
+    "NO se ha actualizado ninguna fila en Supabase. Puede ser RLS, id incorrecto o permisos."
+  );
+
+  alert(
+    "NO se ha actualizado ninguna fila en Supabase.\n\nEl informe NO ha quedado guardado."
+  );
+
+  console.log("PAYLOAD ENVIADO:", payload);
+  console.log("ID REGISTRO:", registroActual.id);
+
+  return;
+}
+
+console.log("FILA ACTUALIZADA:", actualizado[0]);
 
       if (error) {
   mostrarMensaje(
