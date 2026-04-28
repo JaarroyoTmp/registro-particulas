@@ -1002,7 +1002,51 @@ doc.save(nombrePdf);
 
 mostrarMensaje("ok", "✅ PDF generado, descargado y guardado en Supabase correctamente.");
 alert("PDF generado y guardado correctamente en Supabase.");
+      
+doc.save(nombrePdf);
+
+mostrarMensaje("ok", "✅ PDF generado, descargado y guardado en Supabase correctamente.");
+alert("PDF generado y guardado correctamente en Supabase.");
+
+// 👇 ENVÍO DE EMAIL (AQUÍ)
+const destinatariosTexto = prompt(
+  "Introduce los correos a los que quieres enviar el informe, separados por coma.\n\nDéjalo vacío si no quieres enviarlo ahora."
+);
+
+if (destinatariosTexto && destinatariosTexto.trim()) {
+  const destinatarios = destinatariosTexto
+    .split(",")
+    .map(correo => correo.trim())
+    .filter(Boolean);
+
+  try {
+    const respuestaEmail = await fetch("https://uukxdslfmxesufuxjzvt.supabase.co/functions/v1/dynamic-responder", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        destinatarios,
+        numero_informe: numeroFinal,
+        referencia: d.referencia,
+        cliente: d.cliente,
+        pdf_url: pdfUrl
+      })
+    });
+
+    const resultadoEmail = await respuestaEmail.json();
+
+    if (!respuestaEmail.ok) {
+      console.error("ERROR enviando email:", resultadoEmail);
+      alert("PDF guardado, pero NO se pudo enviar el email.");
+    } else {
+      alert("📧 Email enviado correctamente.");
     }
+  } catch (e) {
+    console.error("ERROR llamando a la función:", e);
+    alert("PDF guardado, pero hubo error enviando el email.");
+  }
+}    
 
     async function cabeceraPDF(doc, d, W) {
       doc.setFillColor(8, 43, 85);
