@@ -946,8 +946,62 @@ console.log("FILA ACTUALIZADA:", actualizado[0]);
 
       await tablaFirmaPDF(doc, d, 247);
       piePDF(doc, W, H);
-      doc.save(limpiarNombreArchivo(`${d.informe}_${d.referencia}.pdf`));
-      mostrarMensaje("ok", "PDF generado con diseño elegante y contenido completo.");
+      const nombrePdf = limpiarNombreArchivo(`${d.informe}_${d.referencia}.pdf`);
+const rutaPdf = `informes/${nombrePdf}`;
+const pdfBlob = doc.output("blob");
+
+mostrarMensaje("info", "Subiendo PDF a Supabase Storage...");
+
+const { error: uploadError } = await supabaseClient.storage
+  .from("informes-particulas")
+  .upload(rutaPdf, pdfBlob, {
+    contentType: "application/pdf",
+    upsert: true
+  });
+
+if (uploadError) {
+  mostrarMensaje("error", "PDF generado, pero NO se pudo subir a Supabase: " + uploadError.message);
+  alert("PDF generado, pero NO se pudo subir a Supabase:\n\n" + uploadError.message);
+  doc.save(nombrePdf);
+  return;
+}
+
+const { data: publicData } = supabaseClient.storage
+  .from("informes-particulas")
+  .getPublicUrl(rutaPdf);
+
+const pdfUrl = publicData.publicUrl;
+
+const { data: actualizadoPdf, error: updatePdfError } = await supabaseClient
+  .from("informes_particulas")
+  .update({
+    pdf_url: pdfUrl,
+    pdf_generado_at: new Date().toISOString()
+  })
+  .eq("id", registroActual.id)
+  .select("id, pdf_url, pdf_generado_at");
+
+if (updatePdfError) {
+  mostrarMensaje("error", "PDF subido, pero NO se pudo guardar la URL en Supabase: " + updatePdfError.message);
+  alert("PDF subido, pero NO se pudo guardar la URL en Supabase:\n\n" + updatePdfError.message);
+  doc.save(nombrePdf);
+  return;
+}
+
+if (!actualizadoPdf || actualizadoPdf.length === 0) {
+  mostrarMensaje("error", "PDF subido, pero no se actualizó la fila del informe.");
+  alert("PDF subido, pero no se actualizó la fila del informe.");
+  doc.save(nombrePdf);
+  return;
+}
+
+registroActual.pdf_url = pdfUrl;
+registroActual.pdf_generado_at = actualizadoPdf[0].pdf_generado_at;
+
+doc.save(nombrePdf);
+
+mostrarMensaje("ok", "✅ PDF generado, descargado y guardado en Supabase correctamente.");
+alert("PDF generado y guardado correctamente en Supabase.");
     }
 
     async function cabeceraPDF(doc, d, W) {
