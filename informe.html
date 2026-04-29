@@ -1002,11 +1002,6 @@ doc.save(nombrePdf);
 
 mostrarMensaje("ok", "✅ PDF generado, descargado y guardado en Supabase correctamente.");
 alert("PDF generado y guardado correctamente en Supabase.");
-      
-doc.save(nombrePdf);
-
-mostrarMensaje("ok", "✅ PDF generado, descargado y guardado en Supabase correctamente.");
-alert("PDF generado y guardado correctamente en Supabase.");
 
 // 👇 ENVÍO DE EMAIL (AQUÍ)
 const destinatariosTexto = prompt(
@@ -1048,6 +1043,9 @@ if (destinatariosTexto && destinatariosTexto.trim()) {
   }
 }    
 
+// CIERRE DE generarPDF()      
+}
+      
     async function cabeceraPDF(doc, d, W) {
       doc.setFillColor(8, 43, 85);
       doc.rect(0, 0, W, 30, "F");
@@ -1322,7 +1320,6 @@ function pintarListadoRegistros() {
 }    
 
 cargarRegistros();
-}
       
   </script>
 </body>
