@@ -473,7 +473,7 @@
 
       tbodyListado.innerHTML = datos.map(r => {
         const estado = estadoCalculado(r);
-        const numero = r.numero_informe_final || r.numero_auto_informe || r.informe_particulas || "-";
+        const numero = r.numero_informe_final || r.informe_particulas || r.numero_auto_informe || "-";
         const pdf = r.pdf_url
           ? `<button type="button" class="boton boton-azul" onclick="abrirPdfProtegido('${escaparAtributoJS(r.pdf_url)}')">Abrir PDF</button>`
           : "-";
@@ -506,8 +506,8 @@
       return datos.sort((a, b) => {
         if (tipo === "fecha_asc") return String(a.fecha || "").localeCompare(String(b.fecha || ""));
         if (tipo === "fecha_desc") return String(b.fecha || "").localeCompare(String(a.fecha || ""));
-        if (tipo === "numero_asc") return String(a.numero_informe_final || a.informe_particulas || "").localeCompare(String(b.numero_informe_final || b.informe_particulas || ""));
-        if (tipo === "numero_desc") return String(b.numero_informe_final || b.informe_particulas || "").localeCompare(String(a.numero_informe_final || a.informe_particulas || ""));
+        if (tipo === "numero_asc") return String(a.numero_informe_final || a.informe_particulas || a.numero_auto_informe || "").localeCompare(String(b.numero_informe_final || b.informe_particulas || b.numero_auto_informe || ""));
+        if (tipo === "numero_desc") return String(b.numero_informe_final || b.informe_particulas || b.numero_auto_informe || "").localeCompare(String(a.numero_informe_final || a.informe_particulas || a.numero_auto_informe || ""));
         return 0;
       });
     }
@@ -515,7 +515,16 @@
     function estadoCalculado(r) {
       if ((r.estado_informe || "") === "enviado") return "enviado";
       if ((r.estado_informe || "") === "anulado") return "anulado";
-      if ((r.estado_informe || "") === "realizado" || r.numero_informe_final || r.numero_auto_informe) return "realizado";
+
+      if (
+        (r.estado_informe || "") === "realizado" ||
+        r.numero_informe_final ||
+        r.pdf_url ||
+        r.pdf_generado_at
+      ) {
+        return "realizado";
+      }
+
       return "pendiente";
     }
 
