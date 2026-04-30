@@ -490,7 +490,17 @@
         referencia: document.getElementById("referencia").value.trim(),
         cantidad: Number(document.getElementById("cantidad").value),
         equipo_ensayo: document.getElementById("equipo").value,
+
+        // Al crear registro, NO debe tener número de informe todavía.
         informe_particulas: null,
+        numero_auto_informe: null,
+        numero_informe_final: null,
+        estado_informe: "pendiente",
+        informe_finalizado_at: null,
+        fecha_informe: null,
+        pdf_url: null,
+        pdf_generado_at: null,
+
         foto_url: foto_url,
         foto_path: foto_path
       };
@@ -697,4 +707,3 @@
   </script>
 </body>
 </html>
-
